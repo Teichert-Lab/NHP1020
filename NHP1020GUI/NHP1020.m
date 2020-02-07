@@ -22,7 +22,7 @@ function varargout = NHP1020(varargin)
 
 % Edit the above text to modify the response to help NHP1020
 
-% Last Modified by GUIDE v2.5 04-Feb-2020 14:27:27
+% Last Modified by GUIDE v2.5 06-Feb-2020 19:05:01
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -60,11 +60,55 @@ section2 = axes('unit', 'normalized', 'position', [0 1/3 1 1/3]);
 section3 = axes('unit', 'normalized', 'position', [0 0 1 1/3]);
 
 % Set color
-set(section1, 'Color', 'b', 'XTickMode', 'manual', 'YTickMode', 'manual', 'ZTickMode', 'manual');
-set(section2, 'Color', 'y', 'XTickMode', 'manual', 'YTickMode', 'manual', 'ZTickMode', 'manual');
-set(section3, 'Color', 'g', 'XTickMode', 'manual', 'YTickMode', 'manual', 'ZTickMode', 'manual');
-set(handles.pushbuttonCalculatePatch, 'BackgroundColor', 'r');
-set(handles.pushFinalRun, 'BackgroundColor', 'r');
+handles.color1 = '#ece7f2';
+handles.color2 = '#a6bddb';
+handles.color3 = '#2b8cbe';
+
+set(section1, 'Color', handles.color1, 'XTickMode', 'manual', 'YTickMode', 'manual', 'ZTickMode', 'manual');
+set(section2, 'Color', handles.color2, 'XTickMode', 'manual', 'YTickMode', 'manual', 'ZTickMode', 'manual');
+set(section3, 'Color', handles.color3, 'XTickMode', 'manual', 'YTickMode', 'manual', 'ZTickMode', 'manual');
+
+set(handles.textStep1, 'BackgroundColor', handles.color1);
+set(handles.textStep2, 'BackgroundColor', handles.color2);
+set(handles.textStep3, 'BackgroundColor', handles.color3);
+
+handles.bordercolor = [0.8 0.8 0.8];
+% Color Section 1
+handles.buttoncolor1 = '#e5f5e0';
+set(handles.uipanelSpecifyFolder, 'BackgroundColor', handles.color1, 'HighlightColor', handles.bordercolor);
+set(handles.pushbuttonSpecifyFolder, 'BackgroundColor', handles.buttoncolor1);
+set(handles.uipanelSkullThickness, 'BackgroundColor', handles.color1, 'HighlightColor', handles.bordercolor);
+set(handles.pushbuttonCalculatePatch, 'BackgroundColor', handles.buttoncolor1);
+axes(handles.axesSkullandBrain);
+hold off
+
+% Color Section 2
+handles.buttoncolor2 = '#a1d99b';
+set(handles.uipanelInion, 'BackgroundColor', handles.color2, 'HighlightColor', handles.bordercolor);
+set(handles.uipanelInionX, 'BackgroundColor', handles.color2, 'HighlightColor', handles.bordercolor);
+set(handles.uipanelInionY, 'BackgroundColor', handles.color2, 'HighlightColor', handles.bordercolor);
+set(handles.uipanelInionZ, 'BackgroundColor', handles.color2, 'HighlightColor', handles.bordercolor);
+set(handles.uipanelNasion, 'BackgroundColor', handles.color2, 'HighlightColor', handles.bordercolor);
+set(handles.uipanelNasionX, 'BackgroundColor', handles.color2, 'HighlightColor', handles.bordercolor);
+set(handles.uipanelNasionY, 'BackgroundColor', handles.color2, 'HighlightColor', handles.bordercolor);
+set(handles.uipanelNasionZ, 'BackgroundColor', handles.color2, 'HighlightColor', handles.bordercolor);
+set(handles.uipanelO_q, 'BackgroundColor', handles.color2, 'HighlightColor', handles.bordercolor);
+set(handles.uipanelFp_q, 'BackgroundColor', handles.color2, 'HighlightColor', handles.bordercolor);
+
+
+% Color Section 3
+handles.buttoncolor3 = '#31a354';
+set(handles.uipanelCustomizePosition, 'BackgroundColor', handles.color3, 'HighlightColor', handles.bordercolor);
+set(handles.uipanelSliceNumber, 'BackgroundColor', handles.color3, 'HighlightColor', handles.bordercolor);
+set(handles.pushbuttonImportPosition, 'BackgroundColor', handles.buttoncolor3);
+set(handles.pushbuttonCustomizePosition, 'BackgroundColor', handles.buttoncolor3);
+set(handles.pushFinalRun, 'BackgroundColor', handles.buttoncolor3);
+axes(handles.axesEEGLabView);
+hold off
+axes(handles.axesInskullFinalView);
+hold off
+axes(handles.axesSkullFinalView);
+hold off
 
 handles.GUIpath = pwd;
 
@@ -105,8 +149,37 @@ handles.basedir = basedir;
 handles.datapath = selpath;
 handles.animal = selpath(idcs(end)+1:end);
 
+% Add Toolbox
+addpath(genpath([handles.basedir '/toolbox']));
+
 % Feedback
-set(handles.textSpecifyFolder, 'String', selpath(idcs(end-1)+1:end));
+set(handles.uipanelSpecifyFolder, 'Title', ['Loaded: ', selpath(idcs(end-1)+1:end)]);
+if isfile([handles.datapath '/' handles.animal '_castPatchFull.stl']) == 1
+    handles.castPatchFull = stlread([handles.datapath '/' handles.animal '_castPatchFull.stl']);
+    handles.castPatch = reducepatch(handles.castPatchFull,0.1);
+    
+    if isfile([handles.datapath '/' handles.animal '_ctPatchFull.stl'])
+        handles.ctPatchFull = stlread([handles.datapath '/' handles.animal '_ctPatchFull.stl']);
+        handles.ctPatch = reducepatch(handles.ctPatchFull,0.2);
+        
+        if isfile([handles.datapath '/' handles.animal '_octPatch.stl'])
+            handles.octPatch = stlread([handles.datapath '/' handles.animal '_octPatch.stl']);
+            axes(handles.axesSkullandBrain);
+            hold off
+            p = patch(handles.axesSkullandBrain, handles.castPatch);
+            set(p, 'FaceColor', handles.bordercolor, 'EdgeColor', 'none');
+            daspect([1 1 1])
+            light('Position', [1 0 0], 'Style', 'infinite' )
+            camlight; lighting phong
+            hold on
+            p = patch(handles.axesSkullandBrain, handles.octPatch);
+            set(p, 'FaceColor', [0.5 0.5 1], 'EdgeColor', 'none');
+            alpha(0.5)
+            view([0, -1, 0])
+        end
+    end
+end
+            
 guidata(hObject, handles);
 
 
@@ -123,9 +196,6 @@ d = uiprogressdlg(f,'Title','Please Wait',...
 d.Value = 0.2;
 pause(.5)
 
-% Add Toolbox
-addpath(genpath([handles.basedir '/toolbox']));
-
 % Save skull thickness
 handles.skullThick = str2double(get(handles.editSkullThickness, 'String'));
 
@@ -140,13 +210,17 @@ zgv = ((0:(cast.hdr.dime.dim(4))-1)*cast.hdr.dime.pixdim(4)) +cast.hdr.hist.qoff
 % brain
 castPatchFull = isosurface(X,Y,Z,squeeze(cast.img),0.5); 
 castPatch     = reducepatch(castPatchFull,0.1);
-
+stlwrite([handles.datapath '/' handles.animal '_castPatchFull.stl'], castPatchFull);
+stlwrite([handles.datapath '/' handles.animal '_castPatch.stl'], castPatch);
 % skull
 zeroInd = max(find(zgv<2.0));
 ct.img(:,:,1:zeroInd) = 0;
 ct.img(find(cast.img>0.5)) = 0; % prevent overlapp of the two volumes
 ctPatchFull = isosurface(X,Y,Z,squeeze(ct.img),500); 
 ctPatch     = reducepatch(ctPatchFull,0.2);
+
+stlwrite([handles.datapath '/' handles.animal '_ctPatchFull.stl'], ctPatchFull);
+stlwrite([handles.datapath '/' handles.animal '_ctPatch.stl'], ctPatch);
 
 % calculate the closest distance for all vertices of the ct to the cast.
 % vertices that are very close to the cast, most likely correspond to the
@@ -187,45 +261,24 @@ for i = 1:length(ctPatch.faces)
     end
 end
 octPatch.faces = invInd(ctPatch.faces(find(valPatch),:));
+stlwrite([handles.datapath '/' handles.animal '_octPatch.stl'], octPatch);
 
 % Progress view
 d.Value = 0.8;
 d.Message = 'Displaying ...';
 pause(.5)
 
-% Display skull
-axes(handles.axesSkull);
-hold off
-p = patch(handles.axesSkull, ctPatch);
-set(p, 'FaceColor', [0.5 0.5 1], 'EdgeColor', 'none');
-daspect([1 1 1])
-view(3)
-light('Position', [1 0 0], 'Style', 'infinite' )
-camlight; lighting phong
-set(handles.axesSkull,'xtick',[],'ytick',[])
-
-% Display brain
-axes(handles.axesBrain);
-hold off
-p = patch(handles.axesBrain, castPatch);
-set(p, 'FaceColor', [1.0 0.1 0.1], 'EdgeColor', 'none');
-daspect([1 1 1])
-view(3)
-light('Position', [1 0 0], 'Style', 'infinite' )
-camlight; lighting phong
-set(handles.axesBrain,'xtick',[],'ytick',[])
-
 % Display Section
-axes(handles.axesMRsection);
+axes(handles.axesSkullandBrain);
 hold off
-p = patch(handles.axesMRsection, castPatch);
-set(p, 'FaceColor', [1.0 0.1 0.1], 'EdgeColor', 'none');
+p = patch(handles.axesSkullandBrain, castPatch);
+set(p, 'FaceColor', handles.bordercolor, 'EdgeColor', 'none');
 daspect([1 1 1])
 view(2)
 light('Position', [1 0 0], 'Style', 'infinite' )
 camlight; lighting phong
 hold on
-p = patch(handles.axesMRsection, octPatch);
+p = patch(handles.axesSkullandBrain, octPatch);
 set(p, 'FaceColor', [0.5 0.5 1], 'EdgeColor', 'none');
 alpha(0.5)
 view([0, -1, 0])
@@ -317,9 +370,9 @@ fclose(fid);
 locs = readlocs([handles.datapath '/location_' addon '.xyz'], 'format', {'channum','X','Y','Z','labels'});
 
 % Show in EEGLab View
+cla(handles.axesEEGLabView, 'reset')
 axes(handles.axesEEGLabView);
-hold on
-topoplot([], locs, 'emarker', {'.','b',15,1}, 'hcolor', 'r'); % 'electrodes', 'labels', 
+topoplot([], locs, 'emarker', {'.','r',15,1}, 'hcolor', handles.bordercolor); % 'electrodes', 'labels', 
 
 handles.inskullelectrodes = inskullelectrodes;
 
@@ -331,6 +384,19 @@ function pushbuttonCustomizePosition_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbuttonCustomizePosition (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+% handles.SliceNumber = str2double(get(handles.editSliceNumber, 'String'));
+% handles.ColumnNames = {'Number of Electrodes', 'Nominator'};
+% handles.ColumnNames
+% tmpRowNames = cell(1, handles.SliceNumber);
+% for num_of_slice = 1 : handles.SliceNumber
+%     tmpRowNames(num_of_slice) = {num2str(num_of_slice)};
+%     
+% end
+% handles.RowNames = tmpRowNames;
+% guidata(hObject, handles);
+% 
+% option
 
 
 % --- Executes on button press in pushFinalRun.
@@ -367,7 +433,7 @@ skullelectrodes = getskullelectrodes(handles.inskullelectrodes, inskullsurface, 
 cla(handles.axesInskullFinalView, 'reset')
 axes(handles.axesInskullFinalView);
 p = patch(handles.axesInskullFinalView,handles.castPatch);
-set(p, 'FaceColor', [1.0 0.1 0.1], 'EdgeColor', 'none');
+set(p, 'FaceColor', handles.bordercolor, 'EdgeColor', 'none');
 daspect([1 1 1])
 view([0, 0, 1])
 camroll(90)
@@ -378,7 +444,39 @@ for i = 1:length(skullelectrodes)
 %     if(electrodes(i).use == 1)
 %         plot3( skullelectrodes(i).pos(1), skullelectrodes(i).pos(2),skullelectrodes(i).pos(3) ,'ko','markerfacecolor','b','markersize',10);
 %     end
-    plot3( skullelectrodes(i).pos(1), skullelectrodes(i).pos(2),skullelectrodes(i).pos(3) ,'ko','markerfacecolor','b','markersize',10);
+    plot3( skullelectrodes(i).pos(1), skullelectrodes(i).pos(2),skullelectrodes(i).pos(3) ,'ko','markerfacecolor','r','markersize',10);
+end
+
+% Display final skull electrodes
+cla(handles.axesSkullFinalView, 'reset')
+axes(handles.axesSkullFinalView);
+p = patch(handles.axesSkullFinalView, handles.castPatch);
+set(p, 'FaceColor', handles.bordercolor, 'EdgeColor', 'none');
+daspect([1 1 1])
+view([0, 0, 1])
+camroll(90)
+light('Position', [1 0 0], 'Style', 'infinite' )
+camlight; lighting phong
+hold on
+octPatch = handles.octPatch;
+p = patch(handles.axesSkullFinalView, octPatch);
+set(p, 'FaceColor', [0.5 0.5 1], 'EdgeColor', 'none');
+alpha(0.5)
+for i = 1:length(skullelectrodes)
+    pos     = skullelectrodes(i).skull;
+    posMat  = [pos(1) * ones(size(octPatch.vertices,1),1),...
+               pos(2) * ones(size(octPatch.vertices,1),1),...
+               pos(3) * ones(size(octPatch.vertices,1),1)]';
+
+    tmpP     = octPatch.vertices' - posMat;
+    dstP     = sqrt(sum( tmpP .* tmpP, 1 ));
+    circlInd = find(dstP<5);
+    x        = skullelectrodes(i).normalSkull;
+
+    tmp = [pos pos+10*x];
+    plot3( tmp(1,:), tmp(2,:), tmp(3,:), 'Color', 'r', 'LineWidth', 2 ) 
+    tmp = octPatch.vertices(circlInd,:)';
+    plot3( tmp(1,:), tmp(2,:), tmp(3,:), 'ko', 'markerfacecolor', 'k', 'markersize', 1)
 end
 
 % Print out position data
@@ -592,6 +690,29 @@ function editO_q_Callback(hObject, eventdata, handles)
 % --- Executes during object creation, after setting all properties.
 function editO_q_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to editO_q (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function editSliceNumber_Callback(hObject, eventdata, handles)
+% hObject    handle to editSliceNumber (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of editSliceNumber as text
+%        str2double(get(hObject,'String')) returns contents of editSliceNumber as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function editSliceNumber_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to editSliceNumber (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
