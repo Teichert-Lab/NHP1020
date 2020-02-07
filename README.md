@@ -25,7 +25,7 @@ This is a MATLAB repository for non-human primates' EEG.
 1. Color rendering
 2. Layout updates
 3. Automatically .stl detection 
-Credits to Sven Holcombe (stlwrite) and Eric Johnson (stlread)
+Credits to Sven Holcombe (stlwrite) and Eric Johnson (stlread)  
 Sven (2020). stlwrite - write ASCII or Binary STL files (https://www.mathworks.com/matlabcentral/fileexchange/20922-stlwrite-write-ascii-or-binary-stl-files), MATLAB Central File Exchange. Retrieved February 7, 2020.  
 Eric Johnson (2020). STL File Reader (https://www.mathworks.com/matlabcentral/fileexchange/22409-stl-file-reader), MATLAB Central File Exchange. Retrieved February 7, 2020.
 4. Skull electrodes final view
