@@ -22,7 +22,7 @@ function varargout = NHP1020(varargin)
 
 % Edit the above text to modify the response to help NHP1020
 
-% Last Modified by GUIDE v2.5 06-Feb-2020 19:05:01
+% Last Modified by GUIDE v2.5 10-Feb-2020 15:12:53
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -55,18 +55,22 @@ function NHP1020_OpeningFcn(hObject, eventdata, handles, varargin)
 % Choose default command line output for NHP1020
 handles.output = hObject;
 
-section1 = axes('unit', 'normalized', 'position', [0 2/3 1 1/3]);
-section2 = axes('unit', 'normalized', 'position', [0 1/3 1 1/3]);
-section3 = axes('unit', 'normalized', 'position', [0 0 1 1/3]);
+section1 = axes('unit', 'normalized', 'position', [0 2/3 30.5/40 1/3]);
+section2 = axes('unit', 'normalized', 'position', [0 1/3 30.5/40 1/3]);
+section3 = axes('unit', 'normalized', 'position', [0 0 30.5/40 1/3]);
+section4 = axes('unit', 'normalized', 'position', [30.5/40 0 9.5/40 1]);
+box on
 
 % Set color
-handles.color1 = '#ece7f2';
-handles.color2 = '#a6bddb';
-handles.color3 = '#2b8cbe';
+handles.color1 = '#f1eef6';
+handles.color2 = '#bdc9e1';
+handles.color3 = '#74a9cf';
+handles.color4 = '#0570b0';
 
-set(section1, 'Color', handles.color1, 'XTickMode', 'manual', 'YTickMode', 'manual', 'ZTickMode', 'manual');
-set(section2, 'Color', handles.color2, 'XTickMode', 'manual', 'YTickMode', 'manual', 'ZTickMode', 'manual');
-set(section3, 'Color', handles.color3, 'XTickMode', 'manual', 'YTickMode', 'manual', 'ZTickMode', 'manual');
+set(section1, 'Color', handles.color1, 'xtick', [], 'ytick', [], 'ztick', []);% 'XTickMode', 'manual', 'YTickMode', 'manual', 'ZTickMode', 'manual'
+set(section2, 'Color', handles.color2, 'xtick', [], 'ytick', [], 'ztick', []);
+set(section3, 'Color', handles.color3, 'xtick', [], 'ytick', [], 'ztick', []);
+set(section4, 'Color', handles.color4, 'xtick', [], 'ytick', [], 'ztick', []);
 
 set(handles.textStep1, 'BackgroundColor', handles.color1);
 set(handles.textStep2, 'BackgroundColor', handles.color2);
@@ -94,7 +98,8 @@ set(handles.uipanelNasionY, 'BackgroundColor', handles.color2, 'HighlightColor',
 set(handles.uipanelNasionZ, 'BackgroundColor', handles.color2, 'HighlightColor', handles.bordercolor);
 set(handles.uipanelO_q, 'BackgroundColor', handles.color2, 'HighlightColor', handles.bordercolor);
 set(handles.uipanelFp_q, 'BackgroundColor', handles.color2, 'HighlightColor', handles.bordercolor);
-
+set(handles.pushbuttonPreview, 'BackgroundColor', handles.buttoncolor2);
+axes(handles.axesI2NandN2N);
 
 % Color Section 3
 handles.buttoncolor3 = '#31a354';
@@ -103,6 +108,8 @@ set(handles.uipanelSliceNumber, 'BackgroundColor', handles.color3, 'HighlightCol
 set(handles.pushbuttonImportPosition, 'BackgroundColor', handles.buttoncolor3);
 set(handles.pushbuttonCustomizePosition, 'BackgroundColor', handles.buttoncolor3);
 set(handles.pushFinalRun, 'BackgroundColor', handles.buttoncolor3);
+
+axes(handles.axesTopView);
 axes(handles.axesEEGLabView);
 hold off
 axes(handles.axesInskullFinalView);
@@ -111,6 +118,16 @@ axes(handles.axesSkullFinalView);
 hold off
 
 handles.GUIpath = pwd;
+mydir  = handles.GUIpath;
+idcs   = strfind(mydir,'/');
+newdir = [mydir(1:idcs(end)-1) '/logo'];
+
+% Insert Logo
+axes(handles.axesLogo);
+image(imread([newdir '/Monkey.png']))
+set(handles.axesLogo, 'xtick', []);
+set(handles.axesLogo, 'ytick', []);
+hold off
 
 % Update handles structure
 guidata(hObject, handles);
@@ -144,6 +161,13 @@ basedir = mydir(1:idcs(end)-1);
 selpath = uigetdir(newdir);
 idcs   = strfind(selpath,'/');
 
+% Progress view
+f = uifigure;
+d = uiprogressdlg(f,'Title','Please Wait',...
+        'Message','Loading...');
+d.Value = 0.2;
+pause(.5)
+
 % Set saving path and animal name
 handles.basedir = basedir;
 handles.datapath = selpath;
@@ -154,7 +178,9 @@ addpath(genpath([handles.basedir '/toolbox']));
 
 % Feedback
 set(handles.uipanelSpecifyFolder, 'Title', ['Loaded: ', selpath(idcs(end-1)+1:end)]);
+% If stl file exits, show directly
 if isfile([handles.datapath '/' handles.animal '_castPatchFull.stl']) == 1
+    % Load stl file
     handles.castPatchFull = stlread([handles.datapath '/' handles.animal '_castPatchFull.stl']);
     handles.castPatch = reducepatch(handles.castPatchFull,0.1);
     
@@ -164,6 +190,22 @@ if isfile([handles.datapath '/' handles.animal '_castPatchFull.stl']) == 1
         
         if isfile([handles.datapath '/' handles.animal '_octPatch.stl'])
             handles.octPatch = stlread([handles.datapath '/' handles.animal '_octPatch.stl']);
+            % Top View
+            axes(handles.axesTopView);
+            hold off
+            p = patch(handles.axesTopView, handles.castPatch);
+            set(p, 'FaceColor', handles.bordercolor, 'EdgeColor', 'none');
+            daspect([1 1 1])
+            light('Position', [1 0 0], 'Style', 'infinite' )
+            camlight; lighting phong
+            hold on
+            p = patch(handles.axesTopView, handles.octPatch);
+            set(p, 'FaceColor', [0.5 0.5 1], 'EdgeColor', 'none');
+            alpha(0.5)
+            view([0, 0, 1])
+            camroll(90)
+            
+            % Section View
             axes(handles.axesSkullandBrain);
             hold off
             p = patch(handles.axesSkullandBrain, handles.castPatch);
@@ -178,7 +220,111 @@ if isfile([handles.datapath '/' handles.animal '_castPatchFull.stl']) == 1
             view([0, -1, 0])
         end
     end
+else
+    % If stl file does not exit, calculate it
+    % Save skull thickness
+    handles.skullThick = str2double(get(handles.editSkullThickness, 'String'));
+
+    % Load images
+    ct   = load_nii( [handles.datapath '/' handles.animal, '_CT_skull_filt.nii.gz']  );
+    cast = load_nii( [handles.datapath '/' handles.animal, '_inskull_mask_filt.nii.gz'] );
+    xgv = ((0:(cast.hdr.dime.dim(2))-1)*cast.hdr.dime.pixdim(2)) -cast.hdr.hist.qoffset_x ;
+    ygv = ((0:(cast.hdr.dime.dim(3))-1)*cast.hdr.dime.pixdim(3)) +cast.hdr.hist.qoffset_y ;
+    zgv = ((0:(cast.hdr.dime.dim(4))-1)*cast.hdr.dime.pixdim(4)) +cast.hdr.hist.qoffset_z ;
+    [X,Y,Z] = meshgrid(ygv,xgv,zgv);
+
+    % brain
+    castPatchFull = isosurface(X,Y,Z,squeeze(cast.img),0.5); 
+    castPatch     = reducepatch(castPatchFull,0.1);
+    stlwrite([handles.datapath '/' handles.animal '_castPatchFull.stl'], castPatchFull);
+    stlwrite([handles.datapath '/' handles.animal '_castPatch.stl'], castPatch);
+    % skull
+    zeroInd = max(find(zgv<2.0));
+    ct.img(:,:,1:zeroInd) = 0;
+    ct.img(find(cast.img>0.5)) = 0; % prevent overlapp of the two volumes
+    ctPatchFull = isosurface(X,Y,Z,squeeze(ct.img),500); 
+    ctPatch     = reducepatch(ctPatchFull,0.2);
+
+    stlwrite([handles.datapath '/' handles.animal '_ctPatchFull.stl'], ctPatchFull);
+    stlwrite([handles.datapath '/' handles.animal '_ctPatch.stl'], ctPatch);
+
+    % calculate the closest distance for all vertices of the ct to the cast.
+    % vertices that are very close to the cast, most likely correspond to the
+    % inside skull surface. Remove those vertices and corresponding faces
+    minDist = zeros( size(ctPatch.vertices,1),2 );
+    for i = 1:length(ctPatch.vertices)
+        iMat  = [ ctPatch.vertices(i,1)*ones(size(castPatchFull.vertices,1),1),...  
+                  ctPatch.vertices(i,2)*ones(size(castPatchFull.vertices,1),1),...  
+                  ctPatch.vertices(i,3)*ones(size(castPatchFull.vertices,1),1)]';
+        tmp = castPatchFull.vertices' - iMat;
+        dst = sqrt(sum( tmp .* tmp, 1 ));
+        minDist(i,1) = min(dst);
+        disc         = find(dst==min(dst));
+        minDist(i,2) = disc(1);
+    end
+
+    % Load skullThick from input
+    skullThick = handles.skullThick;
+
+    % Calculate octPatch
+    valInd            = find( minDist(:,1)>skullThick );
+    invInd            = zeros(length(ctPatch.vertices),1 );
+    invInd(valInd)    = 1:length(valInd);
+    octPatch.vertices = ctPatch.vertices(valInd,:);
+    valPatch          = zeros(length(ctPatchFull.faces),1);
+    for i = 1:length(ctPatch.faces)
+        if ismember( ctPatch.faces(i,1), valInd ) && ismember( ctPatch.faces(i,2), valInd ) && ismember( ctPatch.faces(i,3), valInd )  
+            valPatch(i) = 1;
+            %pi = pi + 1;
+            %octPatch.faces(pi) = invInd(ctPatch.faces(i,:));
+
+        end
+    end
+    octPatch.faces = invInd(ctPatch.faces(find(valPatch),:));
+    stlwrite([handles.datapath '/' handles.animal '_octPatch.stl'], octPatch);
+    
+    % Top View
+    axes(handles.axesTopView);
+    hold off
+    p = patch(handles.axesTopView, castPatch);
+    set(p, 'FaceColor', handles.bordercolor, 'EdgeColor', 'none');
+    daspect([1 1 1])
+    light('Position', [1 0 0], 'Style', 'infinite' )
+    camlight; lighting phong
+    hold on
+    p = patch(handles.axesTopView, octPatch);
+    set(p, 'FaceColor', [0.5 0.5 1], 'EdgeColor', 'none');
+    alpha(0.5)
+    view([0, 0, 1])
+    camroll(90)
+
+    % Display Section
+    axes(handles.axesSkullandBrain);
+    hold off
+    p = patch(handles.axesSkullandBrain, castPatch);
+    set(p, 'FaceColor', handles.bordercolor, 'EdgeColor', 'none');
+    daspect([1 1 1])
+    view(2)
+    light('Position', [1 0 0], 'Style', 'infinite' )
+    camlight; lighting phong
+    hold on
+    p = patch(handles.axesSkullandBrain, octPatch);
+    set(p, 'FaceColor', [0.5 0.5 1], 'EdgeColor', 'none');
+    alpha(0.5)
+    view([0, -1, 0])
+
+    % Save to handles
+    handles.castPatchFull = castPatchFull;
+    handles.castPatch = castPatch;
+    handles.octPatch = octPatch;
 end
+
+% Close progress bar
+d.Value = 1;
+d.Message = 'Done!';
+pause(.5)
+close(d);
+close(f);
             
 guidata(hObject, handles);
 
@@ -295,6 +441,42 @@ handles.castPatchFull = castPatchFull;
 handles.castPatch = castPatch;
 handles.octPatch = octPatch;
 guidata(hObject, handles);
+
+
+% --- Executes on button press in pushbuttonPreview.
+function pushbuttonPreview_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbuttonPreview (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Get O_q and Fp_q, percentage of I2N
+O_q = str2double(get(handles.editO_q, 'String'));
+Fp_q = str2double(get(handles.editFp_q, 'String'));
+
+% Get inion and nasion input
+inion = [str2double(get(handles.editInionX, 'String')), str2double(get(handles.editInionY, 'String')), str2double(get(handles.editInionZ, 'String'))];
+nasion = [str2double(get(handles.editNasionX, 'String')), str2double(get(handles.editNasionY, 'String')), str2double(get(handles.editNasionZ, 'String'))];
+inskullsurface = InskullSurface(handles.castPatchFull, inion, nasion, O_q, Fp_q);
+I2N_data = inskullsurface.I2N.data;
+N2N_data = inskullsurface.N2N.data;
+
+% Display I2N and N2N
+cla(handles.axesI2NandN2N)
+axes(handles.axesI2NandN2N);
+hold off
+p = patch(handles.axesI2NandN2N, handles.castPatch);
+alpha(0.5)
+set(p, 'FaceColor', handles.bordercolor, 'EdgeColor', 'none');
+daspect([1 1 1])
+view([0 -1 0])
+light('Position', [1 0 0], 'Style', 'infinite' )
+camlight; lighting phong
+hold on
+plot3(I2N_data(1,:), I2N_data(2,:), I2N_data(3,:), 'Color', [0 1 0], 'LineWidth', 5);
+plot3(N2N_data(1,:), N2N_data(2,:), N2N_data(3,:), 'Color', [1 0 0], 'LineWidth', 5);
+hold off
+guidata(hObject, handles);
+
 
 
 
@@ -475,8 +657,8 @@ for i = 1:length(skullelectrodes)
 
     tmp = [pos pos+10*x];
     plot3( tmp(1,:), tmp(2,:), tmp(3,:), 'Color', 'r', 'LineWidth', 2 ) 
-    tmp = octPatch.vertices(circlInd,:)';
-    plot3( tmp(1,:), tmp(2,:), tmp(3,:), 'ko', 'markerfacecolor', 'k', 'markersize', 1)
+    %tmp = octPatch.vertices(circlInd,:)';
+    %plot3( tmp(1,:), tmp(2,:), tmp(3,:), 'ko', 'markerfacecolor', 'k', 'markersize', 1)
 end
 
 % Print out position data
@@ -721,3 +903,5 @@ function editSliceNumber_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+

@@ -21,6 +21,14 @@ This is a MATLAB repository for non-human primates' EEG.
 ### getQuant
 
 ## Update
+
+### 02/10/2020
+1. fix load data in anywhere
+2. automatically calculate patch file if it is not there.
+3. polish the interface
+4. I2N and N2N preview
+5. delete back surface plot
+
 ### 02/07/2020
 1. Color rendering
 2. Layout updates
