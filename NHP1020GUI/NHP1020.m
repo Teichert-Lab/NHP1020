@@ -22,7 +22,7 @@ function varargout = NHP1020(varargin)
 
 % Edit the above text to modify the response to help NHP1020
 
-% Last Modified by GUIDE v2.5 10-Feb-2020 15:12:53
+% Last Modified by GUIDE v2.5 11-Feb-2020 14:59:05
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -55,11 +55,12 @@ function NHP1020_OpeningFcn(hObject, eventdata, handles, varargin)
 % Choose default command line output for NHP1020
 handles.output = hObject;
 
-section1 = axes('unit', 'normalized', 'position', [0 2/3 30.5/40 1/3]);
-section2 = axes('unit', 'normalized', 'position', [0 1/3 30.5/40 1/3]);
-section3 = axes('unit', 'normalized', 'position', [0 0 30.5/40 1/3]);
-section4 = axes('unit', 'normalized', 'position', [30.5/40 0 9.5/40 1]);
-box on
+section1 = axes('unit', 'normalized', 'position', [0.05 2/3 30.5/40 1/3]);
+section2 = axes('unit', 'normalized', 'position', [0.05 1/3 30.5/40 1/3]);
+section3 = axes('unit', 'normalized', 'position', [0.05 0 30.5/40 1/3]);
+section4 = axes('unit', 'normalized', 'position', [30.5/40 0 9.5/40 2/3]);
+section5 = axes('unit', 'normalized', 'position', [0, 0, 0.05, 1]);
+
 
 % Set color
 handles.color1 = '#f1eef6';
@@ -72,22 +73,55 @@ set(section2, 'Color', handles.color2, 'xtick', [], 'ytick', [], 'ztick', []);
 set(section3, 'Color', handles.color3, 'xtick', [], 'ytick', [], 'ztick', []);
 set(section4, 'Color', handles.color4, 'xtick', [], 'ytick', [], 'ztick', []);
 
-set(handles.textStep1, 'BackgroundColor', handles.color1);
-set(handles.textStep2, 'BackgroundColor', handles.color2);
-set(handles.textStep3, 'BackgroundColor', handles.color3);
+% 5
+x = [0; 0.05; 0.05; 0];
+y = [0; 0; 1; 1];
+c = [1, 1, 10, 10];
+hp = patch(section5, x, y, c);
+textLogo=text(0.5, 0.15,'NHP 1020', 'FontSize', 40, 'Units','normalized');
+uistack(textLogo, 'top')
+set(textLogo,'Rotation',90);
+textLogo=text(0.5, 0.45,'NHP 1020', 'FontSize', 40, 'Units','normalized');
+uistack(textLogo, 'top')
+set(textLogo,'Rotation',90);
+textLogo=text(0.5, 0.75,'NHP 1020', 'FontSize', 40, 'Units','normalized');
+uistack(textLogo, 'top')
+set(textLogo,'Rotation',90);
+colormap('gray');
+set(section5, 'xtick', [], 'ytick', [], 'ztick', []);
+hold off
+
+% 6
+section6 = axes('unit', 'normalized', 'position', [30.5/40 2/3 9.5/40 1/3]);
+x = [0; 0.05; 0.05; 0];
+y = [0; 0; 1; 1];
+c = [1, 1, 10, 10];
+hp = patch(section6, x, y, c);
+textLogo=text(0.1, 0.5,'NHP 1020', 'FontSize', 50, 'Units','normalized');
+uistack(textLogo, 'top')
+
+
+set(section6, 'xtick', [], 'ytick', [], 'ztick', []);
+
 
 handles.bordercolor = [0.8 0.8 0.8];
 % Color Section 1
-handles.buttoncolor1 = '#e5f5e0';
+handles.buttoncolor1 = '#feedde';
 set(handles.uipanelSpecifyFolder, 'BackgroundColor', handles.color1, 'HighlightColor', handles.bordercolor);
 set(handles.pushbuttonSpecifyFolder, 'BackgroundColor', handles.buttoncolor1);
 set(handles.uipanelSkullThickness, 'BackgroundColor', handles.color1, 'HighlightColor', handles.bordercolor);
 set(handles.pushbuttonCalculatePatch, 'BackgroundColor', handles.buttoncolor1);
 axes(handles.axesSkullandBrain);
 hold off
+% Insert label
+axes(handles.axesData);
+fill(handles.axesData, [0, 0, -0.5, 0.5, 1.5, 1, 1], [0, -0.3, -0.3, -0.5, -0.3, -0.3, 0], 1, 'FaceColor', handles.buttoncolor1);
+set(handles.axesData, 'Color', 'none', 'xtick', [], 'ytick', [], 'Visible', 'off');
+textData=text(0.5,-0.3,'Data', 'FontSize', 25);
+set(textData,'Rotation',90);
 
 % Color Section 2
-handles.buttoncolor2 = '#a1d99b';
+handles.buttoncolor2 = '#fdbe85';
 set(handles.uipanelInion, 'BackgroundColor', handles.color2, 'HighlightColor', handles.bordercolor);
 set(handles.uipanelInionX, 'BackgroundColor', handles.color2, 'HighlightColor', handles.bordercolor);
 set(handles.uipanelInionY, 'BackgroundColor', handles.color2, 'HighlightColor', handles.bordercolor);
@@ -100,14 +134,34 @@ set(handles.uipanelO_q, 'BackgroundColor', handles.color2, 'HighlightColor', han
 set(handles.uipanelFp_q, 'BackgroundColor', handles.color2, 'HighlightColor', handles.bordercolor);
 set(handles.pushbuttonPreview, 'BackgroundColor', handles.buttoncolor2);
 axes(handles.axesI2NandN2N);
+% Insert label
+axes(handles.axesMetric);
+axes(handles.axesMetric);
+fill([0, 0, -0.5, 0.5, 1.5, 1, 1], [0, -0.3, -0.3, -0.5, -0.3, -0.3, 0], 1, 'FaceColor', handles.buttoncolor2);
+set(handles.axesMetric, 'Color', 'none', 'xtick', [], 'ytick', [], 'Visible', 'off');
+textMetric=text(0.5,-0.3,'Metric', 'FontSize', 25);
+set(textMetric,'Rotation',90);
 
 % Color Section 3
-handles.buttoncolor3 = '#31a354';
-set(handles.uipanelCustomizePosition, 'BackgroundColor', handles.color3, 'HighlightColor', handles.bordercolor);
-set(handles.uipanelSliceNumber, 'BackgroundColor', handles.color3, 'HighlightColor', handles.bordercolor);
+handles.buttoncolor3 = '#fd8d3c';
 set(handles.pushbuttonImportPosition, 'BackgroundColor', handles.buttoncolor3);
-set(handles.pushbuttonCustomizePosition, 'BackgroundColor', handles.buttoncolor3);
-set(handles.pushFinalRun, 'BackgroundColor', handles.buttoncolor3);
+set(handles.pushbuttonImportLayout, 'BackgroundColor', handles.buttoncolor3);
+% Insert label
+axes(handles.axesLayout);
+axes(handles.axesLayout);
+fill([0, 0, -0.5, 0.5, 1.5, 1, 1], [0, -0.3, -0.3, -0.5, -0.3, -0.3, 0], 1, 'FaceColor', handles.buttoncolor3);
+set(handles.axesLayout, 'Color', 'none', 'xtick', [], 'ytick', [], 'Visible', 'off');
+textLayout=text(0.5,-0.3,'Layout', 'FontSize', 25);
+set(textLayout,'Rotation',90);
+
+% Color Section 4
+handles.buttoncolor4 = '#d94701';
+set(handles.pushbuttonFinalRun, 'BackgroundColor', handles.buttoncolor4);
+% Insert label
+axes(handles.axesCalculate);
+set(handles.axesCalculate, 'unit', 'normalized', 'position', [(30.5/40-0.01*5) (1/3-0.04*5) 0.02*5 0.08*5]);
+fill([0, 0.3, 0.3, 0.5, 0.3, 0.3, 0], [0, 0, -0.5, 0.5, 1.5, 1, 1], 1, 'FaceColor', handles.buttoncolor4);
+set(handles.axesCalculate, 'Color', 'none', 'xtick', [], 'ytick', [], 'Visible', 'off');
 
 axes(handles.axesTopView);
 axes(handles.axesEEGLabView);
@@ -123,11 +177,8 @@ idcs   = strfind(mydir,'/');
 newdir = [mydir(1:idcs(end)-1) '/logo'];
 
 % Insert Logo
-axes(handles.axesLogo);
-image(imread([newdir '/Monkey.png']))
-set(handles.axesLogo, 'xtick', []);
-set(handles.axesLogo, 'ytick', []);
-hold off
+
+
 
 % Update handles structure
 guidata(hObject, handles);
@@ -191,6 +242,7 @@ if isfile([handles.datapath '/' handles.animal '_castPatchFull.stl']) == 1
         if isfile([handles.datapath '/' handles.animal '_octPatch.stl'])
             handles.octPatch = stlread([handles.datapath '/' handles.animal '_octPatch.stl']);
             % Top View
+            cla(handles.axesTopView)
             axes(handles.axesTopView);
             hold off
             p = patch(handles.axesTopView, handles.castPatch);
@@ -206,6 +258,7 @@ if isfile([handles.datapath '/' handles.animal '_castPatchFull.stl']) == 1
             camroll(90)
             
             % Section View
+            cla(handles.axesSkullandBrain)
             axes(handles.axesSkullandBrain);
             hold off
             p = patch(handles.axesSkullandBrain, handles.castPatch);
@@ -226,8 +279,10 @@ else
     handles.skullThick = str2double(get(handles.editSkullThickness, 'String'));
 
     % Load images
-    ct   = load_nii( [handles.datapath '/' handles.animal, '_CT_skull_filt.nii.gz']  );
-    cast = load_nii( [handles.datapath '/' handles.animal, '_inskull_mask_filt.nii.gz'] );
+%     ct   = load_nii( [handles.datapath '/' handles.animal, '_CT_skull_filt.nii.gz']  );
+%     cast = load_nii( [handles.datapath '/' handles.animal, '_inskull_mask_filt.nii.gz'] );
+    ct   = load_nii( [handles.datapath '/' '*CT_skull*.nii.gz']  );
+    cast = load_nii( [handles.datapath '/' '*inskull*.nii.gz'] );
     xgv = ((0:(cast.hdr.dime.dim(2))-1)*cast.hdr.dime.pixdim(2)) -cast.hdr.hist.qoffset_x ;
     ygv = ((0:(cast.hdr.dime.dim(3))-1)*cast.hdr.dime.pixdim(3)) +cast.hdr.hist.qoffset_y ;
     zgv = ((0:(cast.hdr.dime.dim(4))-1)*cast.hdr.dime.pixdim(4)) +cast.hdr.hist.qoffset_z ;
@@ -284,6 +339,7 @@ else
     stlwrite([handles.datapath '/' handles.animal '_octPatch.stl'], octPatch);
     
     % Top View
+    cla(handles.axesTopView)
     axes(handles.axesTopView);
     hold off
     p = patch(handles.axesTopView, castPatch);
@@ -299,6 +355,7 @@ else
     camroll(90)
 
     % Display Section
+    cla(handles.axesSkullandBrain)
     axes(handles.axesSkullandBrain);
     hold off
     p = patch(handles.axesSkullandBrain, castPatch);
@@ -346,8 +403,8 @@ pause(.5)
 handles.skullThick = str2double(get(handles.editSkullThickness, 'String'));
 
 % Load images
-ct   = load_nii( [handles.datapath '/' handles.animal, '_CT_skull_filt.nii.gz']  );
-cast = load_nii( [handles.datapath '/' handles.animal, '_inskull_mask_filt.nii.gz'] );
+ct   = load_nii( [handles.datapath '/' '*CT_skull*.nii.gz']  );
+cast = load_nii( [handles.datapath '/' '*inskull*.nii.gz'] );
 xgv = ((0:(cast.hdr.dime.dim(2))-1)*cast.hdr.dime.pixdim(2)) -cast.hdr.hist.qoffset_x ;
 ygv = ((0:(cast.hdr.dime.dim(3))-1)*cast.hdr.dime.pixdim(3)) +cast.hdr.hist.qoffset_y ;
 zgv = ((0:(cast.hdr.dime.dim(4))-1)*cast.hdr.dime.pixdim(4)) +cast.hdr.hist.qoffset_z ;
@@ -414,7 +471,24 @@ d.Value = 0.8;
 d.Message = 'Displaying ...';
 pause(.5)
 
+% Top View
+cla(handles.axesTopView)
+axes(handles.axesTopView);
+hold off
+p = patch(handles.axesTopView, castPatch);
+set(p, 'FaceColor', handles.bordercolor, 'EdgeColor', 'none');
+daspect([1 1 1])
+light('Position', [1 0 0], 'Style', 'infinite' )
+camlight; lighting phong
+hold on
+p = patch(handles.axesTopView, octPatch);
+set(p, 'FaceColor', [0.5 0.5 1], 'EdgeColor', 'none');
+alpha(0.5)
+view([0, 0, 1])
+camroll(90)
+
 % Display Section
+cla(handles.axesSkullandBrain)
 axes(handles.axesSkullandBrain);
 hold off
 p = patch(handles.axesSkullandBrain, castPatch);
@@ -487,33 +561,6 @@ function pushbuttonImportPosition_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 [filename, pathname] = uigetfile('*.*');
-if filename(end-3:end) == '.txt'
-    % Read from .txt
-    tmp_qStrLst = readcell([pathname, filename]);
-    count = 1;
-    for i = 1 : length(tmp_qStrLst)
-        
-        % Mid in degree
-        el = 90 - ((180 * (i-1)) / (length(tmp_qStrLst)-1));
-        az = 0;
-        inskullelectrodes(count) = InskullElectrode(1, [az, el], num2str(count));
-        count = count + 1;
-        if tmp_qStrLst{i,1} ~= 0
-            for j = 1 : tmp_qStrLst{i,1}
-                
-                % Left
-                az = 90 * (j / tmp_qStrLst{i,2});
-                inskullelectrodes(count) = InskullElectrode(1, [az, el], num2str(count));
-                count = count + 1;
-                
-                % Right
-                az = - az;
-                inskullelectrodes(count) = InskullElectrode(1, [az, el], num2str(count));
-                count = count + 1;
-            end
-        end
-    end
-end
 
 if filename(end-3:end) == '.xyz'
     locs = readlocs([handles.datapath '/' filename], 'format', {'channum','X','Y','Z','labels'});
@@ -554,36 +601,78 @@ locs = readlocs([handles.datapath '/location_' addon '.xyz'], 'format', {'channu
 % Show in EEGLab View
 cla(handles.axesEEGLabView, 'reset')
 axes(handles.axesEEGLabView);
-topoplot([], locs, 'emarker', {'.','r',15,1}, 'hcolor', handles.bordercolor); % 'electrodes', 'labels', 
 
+topoplot([], locs, 'emarker', {'.','r',15,1}, 'hcolor', handles.bordercolor); % 'electrodes', 'labels', 
+hold off
+colormap('gray');
 handles.inskullelectrodes = inskullelectrodes;
 
 guidata(hObject, handles);
 
 
-% --- Executes on button press in pushbuttonCustomizePosition.
-function pushbuttonCustomizePosition_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbuttonCustomizePosition (see GCBO)
+
+% --- Executes on button press in pushbuttonImportLayout.
+function pushbuttonImportLayout_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbuttonImportLayout (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+[filename, pathname] = uigetfile('*.*');
+if filename(end-3:end) == '.txt'
+    % Read from .txt
+    tmp_qStrLst = readcell([pathname, filename]);
+    count = 1;
+    for i = 1 : length(tmp_qStrLst)
+        
+        % Mid in degree
+        el = 90 - ((180 * (i-1)) / (length(tmp_qStrLst)-1));
+        az = 0;
+        inskullelectrodes(count) = InskullElectrode(1, [az, el], num2str(count));
+        count = count + 1;
+        if tmp_qStrLst{i,1} ~= 0
+            for j = 1 : tmp_qStrLst{i,1}
+                
+                % Left
+                az = 90 * (j / tmp_qStrLst{i,2});
+                inskullelectrodes(count) = InskullElectrode(1, [az, el], num2str(count));
+                count = count + 1;
+                
+                % Right
+                az = - az;
+                inskullelectrodes(count) = InskullElectrode(1, [az, el], num2str(count));
+                count = count + 1;
+            end
+        end
+    end
+end
 
-% handles.SliceNumber = str2double(get(handles.editSliceNumber, 'String'));
-% handles.ColumnNames = {'Number of Electrodes', 'Nominator'};
-% handles.ColumnNames
-% tmpRowNames = cell(1, handles.SliceNumber);
-% for num_of_slice = 1 : handles.SliceNumber
-%     tmpRowNames(num_of_slice) = {num2str(num_of_slice)};
-%     
-% end
-% handles.RowNames = tmpRowNames;
-% guidata(hObject, handles);
-% 
-% option
+bl = ' ';
+
+% Save locations
+addon = char(datetime);
+fid = fopen([handles.datapath '/location_' addon '.xyz'], 'w');
+for i = 1 : length(inskullelectrodes)
+    fprintf(fid, [num2str(i) bl num2str(inskullelectrodes(i).cartesian_eeglab(1)) bl num2str(inskullelectrodes(i).cartesian_eeglab(2)) bl num2str(inskullelectrodes(i).cartesian_eeglab(3)) bl inskullelectrodes(i).label '\n']);
+end
+fclose(fid);
+
+% load locations
+locs = readlocs([handles.datapath '/location_' addon '.xyz'], 'format', {'channum','X','Y','Z','labels'});
+
+% Show in EEGLab View
+cla(handles.axesEEGLabView, 'reset')
+axes(handles.axesEEGLabView);
+topoplot([], locs, 'emarker', {'.','r',15,1}, 'hcolor', handles.bordercolor); % 'electrodes', 'labels', 
+hold off
+colormap('gray');
+handles.inskullelectrodes = inskullelectrodes;
+
+guidata(hObject, handles);
 
 
-% --- Executes on button press in pushFinalRun.
-function pushFinalRun_Callback(hObject, eventdata, handles)
-% hObject    handle to pushFinalRun (see GCBO)
+
+% --- Executes on button press in pushbuttonFinalRun.
+function pushbuttonFinalRun_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbuttonFinalRun (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
@@ -880,28 +969,3 @@ function editO_q_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
-
-
-function editSliceNumber_Callback(hObject, eventdata, handles)
-% hObject    handle to editSliceNumber (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of editSliceNumber as text
-%        str2double(get(hObject,'String')) returns contents of editSliceNumber as a double
-
-
-% --- Executes during object creation, after setting all properties.
-function editSliceNumber_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to editSliceNumber (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
