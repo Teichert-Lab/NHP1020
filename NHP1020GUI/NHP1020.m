@@ -228,7 +228,7 @@ handles.animal = selpath(idcs(end)+1:end);
 addpath(genpath([handles.basedir '/toolbox']));
 
 % Feedback
-set(handles.uipanelSpecifyFolder, 'Title', ['Loaded: ', selpath(idcs(end-1)+1:end)]);
+set(handles.uipanelSpecifyFolder, 'Title', selpath(idcs(end-1)+1:end));
 % If stl file exits, show directly
 if isfile([handles.datapath '/' handles.animal '_castPatchFull.stl']) == 1
     % Load stl file
@@ -242,7 +242,7 @@ if isfile([handles.datapath '/' handles.animal '_castPatchFull.stl']) == 1
         if isfile([handles.datapath '/' handles.animal '_octPatch.stl'])
             handles.octPatch = stlread([handles.datapath '/' handles.animal '_octPatch.stl']);
             % Top View
-            cla(handles.axesTopView)
+            cla(handles.axesSkullandBrain)
             axes(handles.axesTopView);
             hold off
             p = patch(handles.axesTopView, handles.castPatch);
@@ -485,7 +485,6 @@ p = patch(handles.axesTopView, octPatch);
 set(p, 'FaceColor', [0.5 0.5 1], 'EdgeColor', 'none');
 alpha(0.5)
 view([0, 0, 1])
-camroll(90)
 
 % Display Section
 cla(handles.axesSkullandBrain)

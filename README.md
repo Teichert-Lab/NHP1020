@@ -23,6 +23,8 @@ This is a MATLAB repository for non-human primates' EEG.
 1. interface improvement
 2. flexible reading files
 3. toolbox description
+4. fix camera rotate bug
+5. add more .locs templates
 
 ### 02/10/2020
 1. fix load data in anywhere
