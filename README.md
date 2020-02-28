@@ -17,6 +17,10 @@ This is a MATLAB repository for non-human primates' EEG.
 10. Now, press Analyze button to see the physical electrodes' position on the skull in third image.
 11. If everything is satisfactory, press Print.txt to acquire output txt files.
 
+## Structure
+### InskullElectrode object
+
+
 ## Update
 
 ### 02/11/2020
