@@ -1,4 +1,4 @@
-function varargout = NHP1020(varargin)
+ function varargout = NHP1020(varargin)
 % NHP1020 MATLAB code for NHP1020.fig
 %      NHP1020, by itself, creates a new NHP1020 or raises the existing
 %      singleton*.
@@ -68,7 +68,7 @@ handles.color2 = '#bdc9e1';
 handles.color3 = '#74a9cf';
 handles.color4 = '#0570b0';
 
-set(section1, 'Color', handles.color1, 'xtick', [], 'ytick', [], 'ztick', []);% 'XTickMode', 'manual', 'YTickMode', 'manual', 'ZTickMode', 'manual'
+set(section1, 'Color', handles.color1, 'xtick', [], 'ytick', [], 'ztick', []); % 'XTickMode', 'manual', 'YTickMode', 'manual', 'ZTickMode', 'manual'
 set(section2, 'Color', handles.color2, 'xtick', [], 'ytick', [], 'ztick', []);
 set(section3, 'Color', handles.color3, 'xtick', [], 'ytick', [], 'ztick', []);
 set(section4, 'Color', handles.color4, 'xtick', [], 'ytick', [], 'ztick', []);
@@ -100,9 +100,7 @@ hp = patch(section6, x, y, c);
 textLogo=text(0.1, 0.5,'NHP 1020', 'FontSize', 50, 'Units','normalized');
 uistack(textLogo, 'top')
 
-
 set(section6, 'xtick', [], 'ytick', [], 'ztick', []);
-
 
 handles.bordercolor = [0.8 0.8 0.8];
 % Color Section 1
@@ -621,7 +619,9 @@ if filename(end-3:end) == '.txt'
     tmp_qStrLst = readcell([pathname, filename]);
     count = 1;
     for i = 1 : length(tmp_qStrLst)
-        
+        if tmp_qStrLst{i,2} == 0
+            continue
+        end
         % Mid in degree
         el = 90 - ((180 * (i-1)) / (length(tmp_qStrLst)-1));
         az = 0;
