@@ -560,7 +560,7 @@ function pushbuttonImportPosition_Callback(hObject, eventdata, handles)
 [filename, pathname] = uigetfile('*.*');
 
 if filename(end-3:end) == '.xyz'
-    locs = readlocs([handles.datapath '/' filename], 'format', {'channum','X','Y','Z','labels'});
+    locs = readlocs([pathname '/' filename], 'format', {'channum','X','Y','Z','labels'});
     for i = 1 : length(locs)
         x = locs(i).X;
         y = locs(i).Y;
@@ -571,7 +571,7 @@ if filename(end-3:end) == '.xyz'
 end
 
 if filename(end-4:end) == '.locs'
-    locs = readlocs([handles.datapath '/' filename]);
+    locs = readlocs([pathname '/' filename]);
     for i = 1 : length(locs)
         x = locs(i).X;
         y = locs(i).Y;
@@ -660,10 +660,14 @@ locs = readlocs([handles.datapath '/location_' addon '.xyz'], 'format', {'channu
 % Show in EEGLab View
 cla(handles.axesEEGLabView, 'reset')
 axes(handles.axesEEGLabView);
-topoplot([], locs, 'emarker', {'.','r',15,1}, 'hcolor', handles.bordercolor); % 'electrodes', 'labels', 
-hold off
-colormap('gray');
-handles.inskullelectrodes = inskullelectrodes;
+if length(locs) > 1
+    topoplot([], locs, 'emarker', {'.','r',15,1}, 'hcolor', handles.bordercolor); % 'electrodes', 'labels', 
+    hold off
+    colormap('gray');
+    handles.inskullelectrodes = inskullelectrodes;
+else
+    warning = msgbox('Invalid input, please change formatting.');
+end
 
 guidata(hObject, handles);
 
