@@ -1,4 +1,4 @@
- function varargout = NHP1020(varargin)
+function varargout = NHP1020(varargin)
 % NHP1020 MATLAB code for NHP1020.fig
 %      NHP1020, by itself, creates a new NHP1020 or raises the existing
 %      singleton*.
@@ -210,6 +210,7 @@ basedir = mydir(1:idcs(end)-1);
 selpath = uigetdir(newdir);
 idcs   = strfind(selpath,'/');
 
+
 % Progress view
 f = uifigure;
 d = uiprogressdlg(f,'Title','Please Wait',...
@@ -224,6 +225,24 @@ handles.animal = selpath(idcs(end)+1:end);
 
 % Add Toolbox
 addpath(genpath([handles.basedir '/toolbox']));
+
+% load default settings
+fid = fopen([handles.datapath '/defaults.txt']);
+if fid ~= -1
+    line = fgetl(fid);
+    line = fgetl(fid);
+    newStr = split(line, ' ');
+    set(handles.editSkullThickness, 'String', newStr(1));
+    set(handles.editInionX, 'String', newStr(2));
+    set(handles.editInionY, 'String', newStr(3));
+    set(handles.editInionZ, 'String', newStr(4));
+    set(handles.editNasionX, 'String', newStr(5));
+    set(handles.editNasionY, 'String', newStr(6));
+    set(handles.editNasionZ, 'String', newStr(7));
+    set(handles.editO_q, 'String', newStr(8));
+    set(handles.editFp_q, 'String', newStr(9));
+    guidata(hObject, handles);
+end
 
 % Feedback
 set(handles.uipanelSpecifyFolder, 'Title', selpath(idcs(end-1)+1:end));
@@ -380,6 +399,7 @@ d.Message = 'Done!';
 pause(.5)
 close(d);
 close(f);
+    
             
 guidata(hObject, handles);
 
@@ -523,10 +543,14 @@ function pushbuttonPreview_Callback(hObject, eventdata, handles)
 % Get O_q and Fp_q, percentage of I2N
 O_q = str2double(get(handles.editO_q, 'String'));
 Fp_q = str2double(get(handles.editFp_q, 'String'));
+handles.O_q = O_q;
+handles.Fp_q = Fp_q;
 
 % Get inion and nasion input
 inion = [str2double(get(handles.editInionX, 'String')), str2double(get(handles.editInionY, 'String')), str2double(get(handles.editInionZ, 'String'))];
 nasion = [str2double(get(handles.editNasionX, 'String')), str2double(get(handles.editNasionY, 'String')), str2double(get(handles.editNasionZ, 'String'))];
+handles.inion = inion;
+handles.nasion = nasion;
 inskullsurface = InskullSurface(handles.castPatchFull, inion, nasion, O_q, Fp_q);
 I2N_data = inskullsurface.I2N.data;
 N2N_data = inskullsurface.N2N.data;
@@ -755,6 +779,19 @@ end
 
 % Print out position data
 writeElectrodes(skullelectrodes, handles.datapath);
+% Pirnt default settings
+defaults_path = [handles.datapath '/defaults.txt'];
+fid = fopen(defaults_path, 'w');
+if fid == -1
+    error('Author:Function:OpenFile', 'Cannot open file: %s', handles.datapath);
+end
+titleLine = 'skullThick inionX inionY inionZ nasionX nasionY nasionZ O_q Fp_q \n';
+fprintf(fid, titleLine);
+bl = ' ';
+defaultsLine = [num2str(handles.skullThick) bl num2str(inion(1)) bl num2str(inion(2)) bl num2str(inion(3)) bl num2str(nasion(1)) bl num2str(nasion(2)) bl num2str(nasion(3)) bl num2str(handles.O_q) bl num2str(handles.Fp_q) bl '\n'];
+fprintf(fid, defaultsLine);
+fclose(fid);
+
 
 % Close progress bar
 d.Value = 1;
