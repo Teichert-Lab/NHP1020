@@ -288,6 +288,7 @@ if isfile([handles.datapath '/' handles.animal '_castPatchFull.stl']) == 1
             set(p, 'FaceColor', [0.5 0.5 1], 'EdgeColor', 'none');
             alpha(0.5)
             view([0, -1, 0])
+            handles.skullThick = str2double(get(handles.editSkullThickness, 'String'));
         end
     end
 else
