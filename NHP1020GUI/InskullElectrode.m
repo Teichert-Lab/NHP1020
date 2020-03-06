@@ -98,6 +98,12 @@ classdef InskullElectrode
             [az_NHP, el_NHP, r] = cart2sph(x_NHP, y_NHP, z_NHP);
             % In degrees
             az_NHP = az_NHP * (360 / (2 * pi));
+            if round(az_NHP) == 180
+                az_NHP = az_NHP - 180;
+            end
+            if round(az_NHP) == -180
+                az_NHP = az_NHP + 180;
+            end
             el_NHP = el_NHP * (360 / (2 * pi));
             sph_NHP = [az_NHP, el_NHP];
         end

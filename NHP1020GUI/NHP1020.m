@@ -703,6 +703,7 @@ function pushbuttonFinalRun_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbuttonFinalRun (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+warning = 0;
 
 % Progress view
 f = uifigure;
@@ -740,10 +741,12 @@ light('Position', [1 0 0], 'Style', 'infinite' )
 camlight; lighting phong
 hold on
 for i = 1:length(skullelectrodes)
+    if skullelectrodes(i).quantity(2) > -handles.O_q/(handles.Fp_q-handles.O_q) || skullelectrodes(i).quantity(2) < (1-handles.O_q)/(handles.Fp_q-handles.O_q)
 %     if(electrodes(i).use == 1)
 %         plot3( skullelectrodes(i).pos(1), skullelectrodes(i).pos(2),skullelectrodes(i).pos(3) ,'ko','markerfacecolor','b','markersize',10);
 %     end
-    plot3( skullelectrodes(i).pos(1), skullelectrodes(i).pos(2),skullelectrodes(i).pos(3) ,'ko','markerfacecolor','r','markersize',10);
+        plot3( skullelectrodes(i).pos(1), skullelectrodes(i).pos(2),skullelectrodes(i).pos(3) ,'ko','markerfacecolor','r','markersize',10);
+    end
 end
 
 % Display final skull electrodes
@@ -773,13 +776,17 @@ for i = 1:length(skullelectrodes)
     x        = skullelectrodes(i).normalSkull;
 
     tmp = [pos pos+10*x];
-    plot3( tmp(1,:), tmp(2,:), tmp(3,:), 'Color', 'r', 'LineWidth', 2 ) 
-    %tmp = octPatch.vertices(circlInd,:)';
-    %plot3( tmp(1,:), tmp(2,:), tmp(3,:), 'ko', 'markerfacecolor', 'k', 'markersize', 1)
+    if skullelectrodes(i).quantity(2) > -handles.O_q/(handles.Fp_q-handles.O_q) || skullelectrodes(i).quantity(2) < (1-handles.O_q)/(handles.Fp_q-handles.O_q)
+        plot3( tmp(1,:), tmp(2,:), tmp(3,:), 'Color', 'r', 'LineWidth', 2 ) 
+        %tmp = octPatch.vertices(circlInd,:)';
+        %plot3( tmp(1,:), tmp(2,:), tmp(3,:), 'ko', 'markerfacecolor', 'k', 'markersize', 1)
+    else
+        warning = 1;
+    end
 end
 
 % Print out position data
-writeElectrodes(skullelectrodes, handles.datapath);
+writeElectrodes(skullelectrodes, handles.datapath, handles.O_q, handles.Fp_q);
 % Pirnt default settings
 defaults_path = [handles.datapath '/defaults.txt'];
 fid = fopen(defaults_path, 'w');
@@ -792,6 +799,11 @@ bl = ' ';
 defaultsLine = [num2str(handles.skullThick) bl num2str(inion(1)) bl num2str(inion(2)) bl num2str(inion(3)) bl num2str(nasion(1)) bl num2str(nasion(2)) bl num2str(nasion(3)) bl num2str(handles.O_q) bl num2str(handles.Fp_q) bl '\n'];
 fprintf(fid, defaultsLine);
 fclose(fid);
+
+% warning
+if warning == 1
+    f = msgbox('Invalid input, please change formatting.');
+end
 
 
 % Close progress bar

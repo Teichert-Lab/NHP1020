@@ -6,7 +6,11 @@ function skullelectrodes = getskullelectrodes(inskullelectrodes, inskullsurface,
         skullelectrodes(i).pos = inskullelectrodes(i).pos;
         skullelectrodes(i).mlDist = inskullelectrodes(i).mlDist;
         skullelectrodes(i).apDist = inskullelectrodes(i).apDist;
-           
+        skullelectrodes(i).quantity = inskullelectrodes(i).quantity;
+        % quantity out of range
+        % min = -O_q/(Fp_q-O_q)
+        % max = (1-O_q)/(Fp_q-O_q)
+        
         % the plane fitting routine 
         pos = inskullelectrodes(i).pos;
         posMat  = [pos(1) * ones(size(castPatchFull.vertices,1),1),...
