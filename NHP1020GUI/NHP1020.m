@@ -55,6 +55,10 @@ function NHP1020_OpeningFcn(hObject, eventdata, handles, varargin)
 % Choose default command line output for NHP1020
 handles.output = hObject;
 
+% check data path and position file
+handles.datapath = 0;
+handles.Position_isloaded = 0;
+
 section1 = axes('unit', 'normalized', 'position', [0.05 2/3 30.5/40 1/3]);
 section2 = axes('unit', 'normalized', 'position', [0.05 1/3 30.5/40 1/3]);
 section3 = axes('unit', 'normalized', 'position', [0.05 0 30.5/40 1/3]);
@@ -208,7 +212,12 @@ idcs   = strfind(mydir,'/');
 newdir = [mydir(1:idcs(end)-1) '/data'];
 basedir = mydir(1:idcs(end)-1);
 selpath = uigetdir(newdir);
-idcs   = strfind(selpath,'/');
+if isequal(selpath,0)
+    disp('User canceled image selection')
+    return;
+else
+    idcs   = strfind(selpath,'/');
+end
 
 
 % Progress view
@@ -226,23 +235,61 @@ handles.animal = selpath(idcs(end)+1:end);
 % Add Toolbox
 addpath(genpath([handles.basedir '/toolbox']));
 
-% load default settings
-fid = fopen([handles.datapath '/defaults.txt']);
+% load default skullthick
+fid = fopen([handles.datapath '/Setup_SkullThickness.txt']);
 if fid ~= -1
     line = fgetl(fid);
     line = fgetl(fid);
     newStr = split(line, ' ');
     set(handles.editSkullThickness, 'String', newStr(1));
+    guidata(hObject, handles);
+end
+
+fid = fopen([handles.datapath '/Setup_LandMarks.txt']);
+if fid ~= -1
+    line = fgetl(fid);
+    line = fgetl(fid);
+    newStr = split(line, ' ');
     set(handles.editInionX, 'String', newStr(2));
     set(handles.editInionY, 'String', newStr(3));
     set(handles.editInionZ, 'String', newStr(4));
-    set(handles.editNasionX, 'String', newStr(5));
-    set(handles.editNasionY, 'String', newStr(6));
-    set(handles.editNasionZ, 'String', newStr(7));
-    set(handles.editO_q, 'String', newStr(8));
-    set(handles.editFp_q, 'String', newStr(9));
+    line = fgetl(fid);
+    newStr = split(line, ' ');
+    set(handles.editNasionX, 'String', newStr(2));
+    set(handles.editNasionY, 'String', newStr(3));
+    set(handles.editNasionZ, 'String', newStr(4));
     guidata(hObject, handles);
 end
+
+fid = fopen([handles.datapath '/Setup_O_qFp_q.txt']);
+if fid ~= -1
+    line = fgetl(fid);
+    line = fgetl(fid);
+    newStr = split(line, ' ');
+    set(handles.editO_q, 'String', newStr(2));
+    line = fgetl(fid);
+    newStr = split(line, ' ');
+    set(handles.editFp_q, 'String', newStr(2));
+    guidata(hObject, handles);
+end
+
+% load default settings
+% fid = fopen([handles.datapath '/defaults.txt']);
+% if fid ~= -1
+%     line = fgetl(fid);
+%     line = fgetl(fid);
+%     newStr = split(line, ' ');
+%     set(handles.editSkullThickness, 'String', newStr(1));
+%     set(handles.editInionX, 'String', newStr(2));
+%     set(handles.editInionY, 'String', newStr(3));
+%     set(handles.editInionZ, 'String', newStr(4));
+%     set(handles.editNasionX, 'String', newStr(5));
+%     set(handles.editNasionY, 'String', newStr(6));
+%     set(handles.editNasionZ, 'String', newStr(7));
+%     set(handles.editO_q, 'String', newStr(8));
+%     set(handles.editFp_q, 'String', newStr(9));
+%     guidata(hObject, handles);
+% end
 
 % Feedback
 set(handles.uipanelSpecifyFolder, 'Title', selpath(idcs(end-1)+1:end));
@@ -411,6 +458,12 @@ function pushbuttonCalculatePatch_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+% Check data folder
+if handles.datapath == 0
+    warning = msgbox('Please specify a data folder first.');
+    return;
+end
+
 % Progress view
 f = uifigure;
 d = uiprogressdlg(f,'Title','Please Wait',...
@@ -540,6 +593,10 @@ function pushbuttonPreview_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbuttonPreview (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+if handles.datapath == 0
+    warning = msgbox('Please specify a data folder first.');
+    return
+end
 
 % Get O_q and Fp_q, percentage of I2N
 O_q = str2double(get(handles.editO_q, 'String'));
@@ -582,7 +639,18 @@ function pushbuttonImportPosition_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+% Check data folder
+if handles.datapath == 0
+    warning = msgbox('Please specify a data folder first.');
+    return;
+end
+
 [filename, pathname] = uigetfile('*.*');
+if isequal(filename,0) || isequal(pathname,0)
+    disp('User canceled position file selection')
+    return;
+end
+
 
 if filename(end-3:end) == '.xyz'
     locs = readlocs([pathname '/' filename], 'format', {'channum','X','Y','Z','labels'});
@@ -593,9 +661,7 @@ if filename(end-3:end) == '.xyz'
         label = locs(i).labels;
         inskullelectrodes(i) = InskullElectrode(2, [x, y, z], label);
     end
-end
-
-if filename(end-4:end) == '.locs'
+elseif filename(end-4:end) == '.locs'
     locs = readlocs([pathname '/' filename]);
     for i = 1 : length(locs)
         x = locs(i).X;
@@ -604,6 +670,18 @@ if filename(end-4:end) == '.locs'
         label = locs(i).labels;
         inskullelectrodes(i) = InskullElectrode(2, [x, y, z], label);
     end
+elseif filename(end-3:end) == '.sph'
+    locs = readlocs([pathname '/' filename]);
+    for i = 1 : length(locs)
+        x = locs(i).X;
+        y = locs(i).Y;
+        z = locs(i).Z;
+        label = locs(i).labels;
+        inskullelectrodes(i) = InskullElectrode(2, [x, y, z], label);
+    end
+else
+    warning = msgbox('Wrong input type, please select a .sph, .xyz or .locs file.');
+    return
 end
 
 
@@ -614,6 +692,12 @@ addon = char(datetime);
 fid = fopen([handles.datapath '/location_' addon '.xyz'], 'w');
 for i = 1 : length(inskullelectrodes)
     fprintf(fid, [num2str(i) bl num2str(inskullelectrodes(i).cartesian_eeglab(1)) bl num2str(inskullelectrodes(i).cartesian_eeglab(2)) bl num2str(inskullelectrodes(i).cartesian_eeglab(3)) bl inskullelectrodes(i).label '\n']);
+end
+fclose(fid);
+
+fid = fopen([handles.datapath '/location_' addon '.sph'], 'w');
+for i = 1 : length(inskullelectrodes)
+    fprintf(fid, [num2str(i) bl num2str(locs(i).sph_theta) bl num2str(locs(i).sph_phi) bl locs(i).labels '\n']);
 end
 fclose(fid);
 
@@ -628,6 +712,7 @@ topoplot([], locs, 'emarker', {'.','r',15,1}, 'hcolor', handles.bordercolor); % 
 hold off
 colormap('gray');
 handles.inskullelectrodes = inskullelectrodes;
+handles.Position_isloaded = 1;
 
 guidata(hObject, handles);
 
@@ -638,7 +723,18 @@ function pushbuttonImportLayout_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbuttonImportLayout (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+% Check data folder
+if handles.datapath == 0
+    warning = msgbox('Please specify a data folder first.');
+    return;
+end
+
 [filename, pathname] = uigetfile('*.*');
+if isequal(filename,0) || isequal(pathname,0)
+    disp('User canceled layout file selection')
+    return;
+end
 if filename(end-3:end) == '.txt'
     % Read from .txt
     tmp_qStrLst = readcell([pathname, filename]);
@@ -667,6 +763,9 @@ if filename(end-3:end) == '.txt'
             end
         end
     end
+else
+    warning = msgbox('Wrong input type, please select a .txt file.');
+    return
 end
 
 bl = ' ';
@@ -693,6 +792,7 @@ if length(locs) > 1
 else
     warning = msgbox('Invalid input, please change formatting.');
 end
+handles.Position_isloaded = 1;
 
 guidata(hObject, handles);
 
@@ -705,6 +805,18 @@ function pushbuttonFinalRun_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 warning = 0;
 
+% Check data folder
+if handles.datapath == 0
+    warning = msgbox('Please specify a data folder first.');
+    return;
+end
+
+% Check position file
+if handles.Position_isloaded == 0
+    warning = msgbox('Please load a position file first.');
+    return;
+end
+
 % Progress view
 f = uifigure;
 d = uiprogressdlg(f,'Title','Please Wait',...
@@ -713,13 +825,13 @@ d.Value = 0.2;
 pause(.5)
 
 % Get O_q and Fp_q, percentage of I2N
-O_q = str2double(get(handles.editO_q, 'String'));
-Fp_q = str2double(get(handles.editFp_q, 'String'));
+handles.O_q = str2double(get(handles.editO_q, 'String'));
+handles.Fp_q = str2double(get(handles.editFp_q, 'String'));
 
 % Get inion and nasion input
 inion = [str2double(get(handles.editInionX, 'String')), str2double(get(handles.editInionY, 'String')), str2double(get(handles.editInionZ, 'String'))];
 nasion = [str2double(get(handles.editNasionX, 'String')), str2double(get(handles.editNasionY, 'String')), str2double(get(handles.editNasionZ, 'String'))];
-inskullsurface = InskullSurface(handles.castPatchFull, inion, nasion, O_q, Fp_q);
+inskullsurface = InskullSurface(handles.castPatchFull, inion, nasion, handles.O_q, handles.Fp_q);
 
 % Progress view
 d.Value = 0.5;
@@ -788,15 +900,79 @@ end
 % Print out position data
 writeElectrodes(skullelectrodes, handles.datapath, handles.O_q, handles.Fp_q);
 % Pirnt default settings
-defaults_path = [handles.datapath '/defaults.txt'];
-fid = fopen(defaults_path, 'w');
-if fid == -1
-    error('Author:Function:OpenFile', 'Cannot open file: %s', handles.datapath);
+% defaults_path = [handles.datapath '/defaults.txt'];
+% fid = fopen(defaults_path, 'w');
+% if fid == -1
+%     error('Author:Function:OpenFile', 'Cannot open file: %s', handles.datapath);
+% end
+% titleLine = 'skullThick inionX inionY inionZ nasionX nasionY nasionZ O_q Fp_q \n';
+% fprintf(fid, titleLine);
+% bl = ' ';
+% defaultsLine = [num2str(handles.skullThick) bl num2str(inion(1)) bl num2str(inion(2)) bl num2str(inion(3)) bl num2str(nasion(1)) bl num2str(nasion(2)) bl num2str(nasion(3)) bl num2str(handles.O_q) bl num2str(handles.Fp_q) bl '\n'];
+% fprintf(fid, defaultsLine);
+% fclose(fid);
+
+% Print SkullThickness
+handles.skullThick = str2double(get(handles.editSkullThickness, 'String'));
+if isequal(handles.datapath,0)
+    disp('Please specify a data folder first.')
+    return;
 end
-titleLine = 'skullThick inionX inionY inionZ nasionX nasionY nasionZ O_q Fp_q \n';
+skullThick_path = [handles.datapath '/Setup_SkullThickness.txt'];
+fid = fopen(skullThick_path, 'w');
+if fid == -1
+    error('Author:Function:OpenFile', 'Cannot open file: %s', skullThick_path);
+end
+titleLine = 'SkullThickness \n';
 fprintf(fid, titleLine);
 bl = ' ';
-defaultsLine = [num2str(handles.skullThick) bl num2str(inion(1)) bl num2str(inion(2)) bl num2str(inion(3)) bl num2str(nasion(1)) bl num2str(nasion(2)) bl num2str(nasion(3)) bl num2str(handles.O_q) bl num2str(handles.Fp_q) bl '\n'];
+defaultsLine = [num2str(handles.skullThick) bl '\n'];
+fprintf(fid, defaultsLine);
+fclose(fid);
+
+% Pirnt inion and nasion
+inion = [str2double(get(handles.editInionX, 'String')), str2double(get(handles.editInionY, 'String')), str2double(get(handles.editInionZ, 'String'))];
+nasion = [str2double(get(handles.editNasionX, 'String')), str2double(get(handles.editNasionY, 'String')), str2double(get(handles.editNasionZ, 'String'))];
+handles.inion = inion;
+handles.nasion = nasion;
+if isequal(handles.datapath,0)
+    disp('Please specify a data folder first.')
+    return;
+end
+LandMarks_path = [handles.datapath '/Setup_LandMarks.txt'];
+fid = fopen(LandMarks_path, 'w');
+if fid == -1
+    error('Author:Function:OpenFile', 'Cannot open file: %s', LandMarks_path);
+end
+titleLine = 'Name X Y Z \n';
+fprintf(fid, titleLine);
+bl = ' ';
+defaultsLine = ['inion' bl num2str(handles.inion(1)) bl num2str(handles.inion(2)) bl num2str(handles.inion(3)) bl '\n'];
+fprintf(fid, defaultsLine);
+defaultsLine = ['nasion' bl num2str(handles.nasion(1)) bl num2str(handles.nasion(2)) bl num2str(handles.nasion(3)) bl '\n'];
+fprintf(fid, defaultsLine);
+fclose(fid);
+
+% Print O_q and Fp_q
+O_q = str2double(get(handles.editO_q, 'String'));
+Fp_q = str2double(get(handles.editFp_q, 'String'));
+handles.O_q = O_q;
+handles.Fp_q = Fp_q;
+if isequal(handles.datapath,0)
+    disp('Please specify a data folder first.')
+    return;
+end
+O_qFp_q_path = [handles.datapath '/Setup_O_qFp_q.txt'];
+fid = fopen(O_qFp_q_path, 'w');
+if fid == -1
+    error('Author:Function:OpenFile', 'Cannot open file: %s', O_qFp_q_path);
+end
+titleLine = 'Name Percentage \n';
+fprintf(fid, titleLine);
+bl = ' ';
+defaultsLine = ['O_q' bl num2str(handles.O_q) bl '\n'];
+fprintf(fid, defaultsLine);
+defaultsLine = ['Fp_q' bl num2str(handles.Fp_q) bl '\n'];
 fprintf(fid, defaultsLine);
 fclose(fid);
 
@@ -826,6 +1002,30 @@ function editInionX_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of editInionX as text
 %        str2double(get(hObject,'String')) returns contents of editInionX as a double
+inion = [str2double(get(handles.editInionX, 'String')), str2double(get(handles.editInionY, 'String')), str2double(get(handles.editInionZ, 'String'))];
+nasion = [str2double(get(handles.editNasionX, 'String')), str2double(get(handles.editNasionY, 'String')), str2double(get(handles.editNasionZ, 'String'))];
+handles.inion = inion;
+handles.nasion = nasion;
+
+if isequal(handles.datapath,0)
+    disp('Please specify a data folder first.')
+    return;
+end
+LandMarks_path = [handles.datapath '/Setup_LandMarks.txt'];
+fid = fopen(LandMarks_path, 'w');
+if fid == -1
+    error('Author:Function:OpenFile', 'Cannot open file: %s', LandMarks_path);
+end
+titleLine = 'Name X Y Z \n';
+fprintf(fid, titleLine);
+bl = ' ';
+defaultsLine = ['inion' bl num2str(handles.inion(1)) bl num2str(handles.inion(2)) bl num2str(handles.inion(3)) bl '\n'];
+fprintf(fid, defaultsLine);
+defaultsLine = ['nasion' bl num2str(handles.nasion(1)) bl num2str(handles.nasion(2)) bl num2str(handles.nasion(3)) bl '\n'];
+fprintf(fid, defaultsLine);
+fclose(fid);
+
+guidata(hObject, handles);
 
 
 % --- Executes during object creation, after setting all properties.
@@ -850,6 +1050,31 @@ function editInionZ_Callback(hObject, eventdata, handles)
 % Hints: get(hObject,'String') returns contents of editInionZ as text
 %        str2double(get(hObject,'String')) returns contents of editInionZ as a double
 
+inion = [str2double(get(handles.editInionX, 'String')), str2double(get(handles.editInionY, 'String')), str2double(get(handles.editInionZ, 'String'))];
+nasion = [str2double(get(handles.editNasionX, 'String')), str2double(get(handles.editNasionY, 'String')), str2double(get(handles.editNasionZ, 'String'))];
+handles.inion = inion;
+handles.nasion = nasion;
+
+if isequal(handles.datapath,0)
+    disp('Please specify a data folder first.')
+    return;
+end
+LandMarks_path = [handles.datapath '/Setup_LandMarks.txt'];
+fid = fopen(LandMarks_path, 'w');
+if fid == -1
+    error('Author:Function:OpenFile', 'Cannot open file: %s', LandMarks_path);
+end
+titleLine = 'Name X Y Z \n';
+fprintf(fid, titleLine);
+bl = ' ';
+defaultsLine = ['inion' bl num2str(handles.inion(1)) bl num2str(handles.inion(2)) bl num2str(handles.inion(3)) bl '\n'];
+fprintf(fid, defaultsLine);
+defaultsLine = ['nasion' bl num2str(handles.nasion(1)) bl num2str(handles.nasion(2)) bl num2str(handles.nasion(3)) bl '\n'];
+fprintf(fid, defaultsLine);
+fclose(fid);
+
+guidata(hObject, handles);
+
 
 % --- Executes during object creation, after setting all properties.
 function editInionZ_CreateFcn(hObject, eventdata, handles)
@@ -872,6 +1097,31 @@ function editInionY_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of editInionY as text
 %        str2double(get(hObject,'String')) returns contents of editInionY as a double
+
+inion = [str2double(get(handles.editInionX, 'String')), str2double(get(handles.editInionY, 'String')), str2double(get(handles.editInionZ, 'String'))];
+nasion = [str2double(get(handles.editNasionX, 'String')), str2double(get(handles.editNasionY, 'String')), str2double(get(handles.editNasionZ, 'String'))];
+handles.inion = inion;
+handles.nasion = nasion;
+
+if isequal(handles.datapath,0)
+    disp('Please specify a data folder first.')
+    return;
+end
+LandMarks_path = [handles.datapath '/Setup_LandMarks.txt'];
+fid = fopen(LandMarks_path, 'w');
+if fid == -1
+    error('Author:Function:OpenFile', 'Cannot open file: %s', LandMarks_path);
+end
+titleLine = 'Name X Y Z \n';
+fprintf(fid, titleLine);
+bl = ' ';
+defaultsLine = ['inion' bl num2str(handles.inion(1)) bl num2str(handles.inion(2)) bl num2str(handles.inion(3)) bl '\n'];
+fprintf(fid, defaultsLine);
+defaultsLine = ['nasion' bl num2str(handles.nasion(1)) bl num2str(handles.nasion(2)) bl num2str(handles.nasion(3)) bl '\n'];
+fprintf(fid, defaultsLine);
+fclose(fid);
+
+guidata(hObject, handles);
 
 
 % --- Executes during object creation, after setting all properties.
@@ -896,6 +1146,31 @@ function editNasionZ_Callback(hObject, eventdata, handles)
 % Hints: get(hObject,'String') returns contents of editNasionZ as text
 %        str2double(get(hObject,'String')) returns contents of editNasionZ as a double
 
+inion = [str2double(get(handles.editInionX, 'String')), str2double(get(handles.editInionY, 'String')), str2double(get(handles.editInionZ, 'String'))];
+nasion = [str2double(get(handles.editNasionX, 'String')), str2double(get(handles.editNasionY, 'String')), str2double(get(handles.editNasionZ, 'String'))];
+handles.inion = inion;
+handles.nasion = nasion;
+
+if isequal(handles.datapath,0)
+    disp('Please specify a data folder first.')
+    return;
+end
+LandMarks_path = [handles.datapath '/Setup_LandMarks.txt'];
+fid = fopen(LandMarks_path, 'w');
+if fid == -1
+    error('Author:Function:OpenFile', 'Cannot open file: %s', LandMarks_path);
+end
+titleLine = 'Name X Y Z \n';
+fprintf(fid, titleLine);
+bl = ' ';
+defaultsLine = ['inion' bl num2str(handles.inion(1)) bl num2str(handles.inion(2)) bl num2str(handles.inion(3)) bl '\n'];
+fprintf(fid, defaultsLine);
+defaultsLine = ['nasion' bl num2str(handles.nasion(1)) bl num2str(handles.nasion(2)) bl num2str(handles.nasion(3)) bl '\n'];
+fprintf(fid, defaultsLine);
+fclose(fid);
+
+guidata(hObject, handles);
+
 
 % --- Executes during object creation, after setting all properties.
 function editNasionZ_CreateFcn(hObject, eventdata, handles)
@@ -918,6 +1193,31 @@ function editNasionY_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of editNasionY as text
 %        str2double(get(hObject,'String')) returns contents of editNasionY as a double
+
+inion = [str2double(get(handles.editInionX, 'String')), str2double(get(handles.editInionY, 'String')), str2double(get(handles.editInionZ, 'String'))];
+nasion = [str2double(get(handles.editNasionX, 'String')), str2double(get(handles.editNasionY, 'String')), str2double(get(handles.editNasionZ, 'String'))];
+handles.inion = inion;
+handles.nasion = nasion;
+
+if isequal(handles.datapath,0)
+    disp('Please specify a data folder first.')
+    return;
+end
+LandMarks_path = [handles.datapath '/Setup_LandMarks.txt'];
+fid = fopen(LandMarks_path, 'w');
+if fid == -1
+    error('Author:Function:OpenFile', 'Cannot open file: %s', LandMarks_path);
+end
+titleLine = 'Name X Y Z \n';
+fprintf(fid, titleLine);
+bl = ' ';
+defaultsLine = ['inion' bl num2str(handles.inion(1)) bl num2str(handles.inion(2)) bl num2str(handles.inion(3)) bl '\n'];
+fprintf(fid, defaultsLine);
+defaultsLine = ['nasion' bl num2str(handles.nasion(1)) bl num2str(handles.nasion(2)) bl num2str(handles.nasion(3)) bl '\n'];
+fprintf(fid, defaultsLine);
+fclose(fid);
+
+guidata(hObject, handles);
 
 
 % --- Executes during object creation, after setting all properties.
@@ -942,6 +1242,31 @@ function editNasionX_Callback(hObject, eventdata, handles)
 % Hints: get(hObject,'String') returns contents of editNasionX as text
 %        str2double(get(hObject,'String')) returns contents of editNasionX as a double
 
+inion = [str2double(get(handles.editInionX, 'String')), str2double(get(handles.editInionY, 'String')), str2double(get(handles.editInionZ, 'String'))];
+nasion = [str2double(get(handles.editNasionX, 'String')), str2double(get(handles.editNasionY, 'String')), str2double(get(handles.editNasionZ, 'String'))];
+handles.inion = inion;
+handles.nasion = nasion;
+
+if isequal(handles.datapath,0)
+    disp('Please specify a data folder first.')
+    return;
+end
+LandMarks_path = [handles.datapath '/Setup_LandMarks.txt'];
+fid = fopen(LandMarks_path, 'w');
+if fid == -1
+    error('Author:Function:OpenFile', 'Cannot open file: %s', LandMarks_path);
+end
+titleLine = 'Name X Y Z \n';
+fprintf(fid, titleLine);
+bl = ' ';
+defaultsLine = ['inion' bl num2str(handles.inion(1)) bl num2str(handles.inion(2)) bl num2str(handles.inion(3)) bl '\n'];
+fprintf(fid, defaultsLine);
+defaultsLine = ['nasion' bl num2str(handles.nasion(1)) bl num2str(handles.nasion(2)) bl num2str(handles.nasion(3)) bl '\n'];
+fprintf(fid, defaultsLine);
+fclose(fid);
+
+guidata(hObject, handles);
+
 
 % --- Executes during object creation, after setting all properties.
 function editNasionX_CreateFcn(hObject, eventdata, handles)
@@ -963,6 +1288,25 @@ function editSkullThickness_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of editSkullThickness as text
 %        str2double(get(hObject,'String')) returns contents of editSkullThickness as a double
+handles.skullThick = str2double(get(handles.editSkullThickness, 'String'));
+
+if isequal(handles.datapath,0)
+    disp('Please specify a data folder first.')
+    return;
+end
+skullThick_path = [handles.datapath '/Setup_SkullThickness.txt'];
+fid = fopen(skullThick_path, 'w');
+if fid == -1
+    error('Author:Function:OpenFile', 'Cannot open file: %s', skullThick_path);
+end
+titleLine = 'SkullThickness \n';
+fprintf(fid, titleLine);
+bl = ' ';
+defaultsLine = [num2str(handles.skullThick) bl '\n'];
+fprintf(fid, defaultsLine);
+fclose(fid);
+
+guidata(hObject, handles);
 
 
 % --- Executes during object creation, after setting all properties.
@@ -986,6 +1330,30 @@ function editFp_q_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of editFp_q as text
 %        str2double(get(hObject,'String')) returns contents of editFp_q as a double
+O_q = str2double(get(handles.editO_q, 'String'));
+Fp_q = str2double(get(handles.editFp_q, 'String'));
+handles.O_q = O_q;
+handles.Fp_q = Fp_q;
+
+if isequal(handles.datapath,0)
+    disp('Please specify a data folder first.')
+    return;
+end
+O_qFp_q_path = [handles.datapath '/Setup_O_qFp_q.txt'];
+fid = fopen(O_qFp_q_path, 'w');
+if fid == -1
+    error('Author:Function:OpenFile', 'Cannot open file: %s', O_qFp_q_path);
+end
+titleLine = 'Name Percentage \n';
+fprintf(fid, titleLine);
+bl = ' ';
+defaultsLine = ['O_q' bl num2str(handles.O_q) bl '\n'];
+fprintf(fid, defaultsLine);
+defaultsLine = ['Fp_q' bl num2str(handles.Fp_q) bl '\n'];
+fprintf(fid, defaultsLine);
+fclose(fid);
+
+guidata(hObject, handles);
 
 
 % --- Executes during object creation, after setting all properties.
@@ -1009,6 +1377,30 @@ function editO_q_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of editO_q as text
 %        str2double(get(hObject,'String')) returns contents of editO_q as a double
+O_q = str2double(get(handles.editO_q, 'String'));
+Fp_q = str2double(get(handles.editFp_q, 'String'));
+handles.O_q = O_q;
+handles.Fp_q = Fp_q;
+
+if isequal(handles.datapath,0)
+    disp('Please specify a data folder first.')
+    return;
+end
+O_qFp_q_path = [handles.datapath '/Setup_O_qFp_q.txt'];
+fid = fopen(O_qFp_q_path, 'w');
+if fid == -1
+    error('Author:Function:OpenFile', 'Cannot open file: %s', O_qFp_q_path);
+end
+titleLine = 'Name Percentage \n';
+fprintf(fid, titleLine);
+bl = ' ';
+defaultsLine = ['O_q' bl num2str(handles.O_q) bl '\n'];
+fprintf(fid, defaultsLine);
+defaultsLine = ['Fp_q' bl num2str(handles.Fp_q) bl '\n'];
+fprintf(fid, defaultsLine);
+fclose(fid);
+
+guidata(hObject, handles);
 
 
 % --- Executes during object creation, after setting all properties.
