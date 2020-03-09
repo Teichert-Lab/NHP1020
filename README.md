@@ -38,5 +38,10 @@ Sven (2020). stlwrite - write ASCII or Binary STL files (https://www.mathworks.c
 Eric Johnson (2020). STL File Reader (https://www.mathworks.com/matlabcentral/fileexchange/22409-stl-file-reader), MATLAB Central File Exchange. Retrieved February 7, 2020.
 4. Skull electrodes final view
 5. Brain color update
-6. EEGlab plot update (red electrodes, gray line )
+6. EEGlab plot update (red electrodes, gray line)
+
+## References
+
+1. Sven (2020). stlwrite - write ASCII or Binary STL files (https://www.mathworks.com/matlabcentral/fileexchange/20922-stlwrite-write-ascii-or-binary-stl-files), MATLAB Central File Exchange. Retrieved February 7, 2020.  
+2. Eric Johnson (2020). STL File Reader (https://www.mathworks.com/matlabcentral/fileexchange/22409-stl-file-reader), MATLAB Central File Exchange. Retrieved February 7, 2020.
 
