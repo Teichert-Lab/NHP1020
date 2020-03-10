@@ -690,6 +690,9 @@ bl = ' ';
 
 % Save locations
 addon = char(datetime);
+addon = split(addon);
+addon = addon{2};
+addon = strrep(addon,':', '-');
 fid = fopen([handles.datapath '\location_' addon '.xyz'], 'w');
 for i = 1 : length(inskullelectrodes)
     fprintf(fid, [num2str(i) bl num2str(inskullelectrodes(i).cartesian_eeglab(1)) bl num2str(inskullelectrodes(i).cartesian_eeglab(2)) bl num2str(inskullelectrodes(i).cartesian_eeglab(3)) bl inskullelectrodes(i).label '\n']);
@@ -773,6 +776,9 @@ bl = ' ';
 
 % Save locations
 addon = char(datetime);
+addon = split(addon);
+addon = addon{2};
+addon = strrep(addon,':', '-');
 fid = fopen([handles.datapath '\location_' addon '.xyz'], 'w');
 for i = 1 : length(inskullelectrodes)
     fprintf(fid, [num2str(i) bl num2str(inskullelectrodes(i).cartesian_eeglab(1)) bl num2str(inskullelectrodes(i).cartesian_eeglab(2)) bl num2str(inskullelectrodes(i).cartesian_eeglab(3)) bl inskullelectrodes(i).label '\n']);
