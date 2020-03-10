@@ -55,6 +55,8 @@ function NHP1020_OpeningFcn(hObject, eventdata, handles, varargin)
 % Choose default command line output for NHP1020
 handles.output = hObject;
 
+% Check filesep
+handles.separator = filesep;
 
 % check data path and position file
 handles.datapath = 0;
@@ -176,8 +178,8 @@ hold off
 
 handles.GUIpath = pwd;
 % mydir  = handles.GUIpath;
-% idcs   = strfind(mydir,'\');
-% newdir = [mydir(1:idcs(end)-1) '\logo'];
+% idcs   = strfind(mydir, handles.separator);
+% newdir = [mydir(1:idcs(end)-1) handles.separator 'logo'];
 
 % Insert Logo
 
@@ -209,17 +211,31 @@ function pushbuttonSpecifyFolder_Callback(hObject, eventdata, handles)
 
 % Specify a data folder
 mydir  = handles.GUIpath;
-idcs   = strfind(mydir,'\');
-newdir = [mydir(1:idcs(end)-1) '\data'];
+idcs   = strfind(mydir, handles.separator);
+newdir = [mydir(1:idcs(end)-1) handles.separator 'data'];
 basedir = mydir(1:idcs(end)-1);
 selpath = uigetdir(newdir);
 if isequal(selpath,0)
     disp('User canceled image selection')
     return;
 else
-    idcs   = strfind(selpath,'\');
+    idcs   = strfind(selpath, handles.separator);
 end
 
+% Set saving path and animal name
+handles.basedir = basedir;
+handles.datapath = selpath;
+handles.animal = selpath(idcs(end)+1:end);
+
+% Add Toolbox
+addpath(genpath([handles.basedir handles.separator 'toolbox']));
+
+% Check eeglab toolbox
+eeglab_isLoaded = exist([handles.basedir '/toolbox/eeglab']);
+if eeglab_isLoaded ~= 7 % not exist
+    warning = msgbox('Please download eeeglab from https://sccn.ucsd.edu/eeglab/download.php and rename the folder as eeglab and put it in the toolbox folder.');
+    return
+end
 
 % Progress view
 f = uifigure;
@@ -228,16 +244,8 @@ d = uiprogressdlg(f,'Title','Please Wait',...
 d.Value = 0.2;
 pause(.5)
 
-% Set saving path and animal name
-handles.basedir = basedir;
-handles.datapath = selpath;
-handles.animal = selpath(idcs(end)+1:end);
-
-% Add Toolbox
-addpath(genpath([handles.basedir '\toolbox']));
-
 % load default skullthick
-fid = fopen([handles.datapath '\Setup_SkullThickness.txt']);
+fid = fopen([handles.datapath handles.separator 'Setup_SkullThickness.txt']);
 if fid ~= -1
     line = fgetl(fid);
     line = fgetl(fid);
@@ -246,7 +254,7 @@ if fid ~= -1
     guidata(hObject, handles);
 end
 
-fid = fopen([handles.datapath '\Setup_LandMarks.txt']);
+fid = fopen([handles.datapath handles.separator 'Setup_LandMarks.txt']);
 if fid ~= -1
     line = fgetl(fid);
     line = fgetl(fid);
@@ -262,7 +270,7 @@ if fid ~= -1
     guidata(hObject, handles);
 end
 
-fid = fopen([handles.datapath '\Setup_O_qFp_q.txt']);
+fid = fopen([handles.datapath handles.separator 'Setup_O_qFp_q.txt']);
 if fid ~= -1
     line = fgetl(fid);
     line = fgetl(fid);
@@ -275,7 +283,7 @@ if fid ~= -1
 end
 
 % load default settings
-% fid = fopen([handles.datapath '\defaults.txt']);
+% fid = fopen([handles.datapath handles.separator defaults.txt']);
 % if fid ~= -1
 %     line = fgetl(fid);
 %     line = fgetl(fid);
@@ -295,17 +303,17 @@ end
 % Feedback
 set(handles.uipanelSpecifyFolder, 'Title', selpath(idcs(end-1)+1:end));
 % If stl file exits, show directly
-if isfile([handles.datapath '\' handles.animal '_castPatchFull.stl']) == 1
+if isfile([handles.datapath handles.separator handles.animal '_castPatchFull.stl']) == 1
     % Load stl file
-    handles.castPatchFull = stlread([handles.datapath '\' handles.animal '_castPatchFull.stl']);
+    handles.castPatchFull = stlread([handles.datapath handles.separator handles.animal '_castPatchFull.stl']);
     handles.castPatch = reducepatch(handles.castPatchFull,0.1);
     
-    if isfile([handles.datapath '\' handles.animal '_ctPatchFull.stl'])
-        handles.ctPatchFull = stlread([handles.datapath '\' handles.animal '_ctPatchFull.stl']);
+    if isfile([handles.datapath handles.separator handles.animal '_ctPatchFull.stl'])
+        handles.ctPatchFull = stlread([handles.datapath handles.separator handles.animal '_ctPatchFull.stl']);
         handles.ctPatch = reducepatch(handles.ctPatchFull,0.2);
         
-        if isfile([handles.datapath '\' handles.animal '_octPatch.stl'])
-            handles.octPatch = stlread([handles.datapath '\' handles.animal '_octPatch.stl']);
+        if isfile([handles.datapath handles.separator handles.animal '_octPatch.stl'])
+            handles.octPatch = stlread([handles.datapath handles.separator handles.animal '_octPatch.stl']);
             % Top View
             cla(handles.axesSkullandBrain)
             axes(handles.axesTopView);
@@ -345,10 +353,10 @@ else
     handles.skullThick = str2double(get(handles.editSkullThickness, 'String'));
 
     % Load images
-%     ct   = load_nii( [handles.datapath '\' handles.animal, '_CT_skull_filt.nii.gz']  );
-%     cast = load_nii( [handles.datapath '\' handles.animal, '_inskull_mask_filt.nii.gz'] );
-    ct   = load_nii( [handles.datapath '\' '*CT_skull*.nii.gz']  );
-    cast = load_nii( [handles.datapath '\' '*inskull*.nii.gz'] );
+%     ct   = load_nii( [handles.datapath handles.separator handles.animal, '_CT_skull_filt.nii.gz']  );
+%     cast = load_nii( [handles.datapath handles.separator handles.animal, '_inskull_mask_filt.nii.gz'] );
+    ct   = load_nii( [handles.datapath handles.separator '*CT_skull*.nii.gz']  );
+    cast = load_nii( [handles.datapath handles.separator '*inskull*.nii.gz'] );
     xgv = ((0:(cast.hdr.dime.dim(2))-1)*cast.hdr.dime.pixdim(2)) -cast.hdr.hist.qoffset_x ;
     ygv = ((0:(cast.hdr.dime.dim(3))-1)*cast.hdr.dime.pixdim(3)) +cast.hdr.hist.qoffset_y ;
     zgv = ((0:(cast.hdr.dime.dim(4))-1)*cast.hdr.dime.pixdim(4)) +cast.hdr.hist.qoffset_z ;
@@ -357,8 +365,8 @@ else
     % brain
     castPatchFull = isosurface(X,Y,Z,squeeze(cast.img),0.5); 
     castPatch     = reducepatch(castPatchFull,0.1);
-    stlwrite([handles.datapath '\' handles.animal '_castPatchFull.stl'], castPatchFull);
-    stlwrite([handles.datapath '\' handles.animal '_castPatch.stl'], castPatch);
+    stlwrite([handles.datapath handles.separator handles.animal '_castPatchFull.stl'], castPatchFull);
+    stlwrite([handles.datapath handles.separator handles.animal '_castPatch.stl'], castPatch);
     % skull
     zeroInd = max(find(zgv<2.0));
     ct.img(:,:,1:zeroInd) = 0;
@@ -366,8 +374,8 @@ else
     ctPatchFull = isosurface(X,Y,Z,squeeze(ct.img),500); 
     ctPatch     = reducepatch(ctPatchFull,0.2);
 
-    stlwrite([handles.datapath '\' handles.animal '_ctPatchFull.stl'], ctPatchFull);
-    stlwrite([handles.datapath '\' handles.animal '_ctPatch.stl'], ctPatch);
+    stlwrite([handles.datapath handles.separator handles.animal '_ctPatchFull.stl'], ctPatchFull);
+    stlwrite([handles.datapath handles.separator handles.animal '_ctPatch.stl'], ctPatch);
 
     % calculate the closest distance for all vertices of the ct to the cast.
     % vertices that are very close to the cast, most likely correspond to the
@@ -402,7 +410,7 @@ else
         end
     end
     octPatch.faces = invInd(ctPatch.faces(find(valPatch),:));
-    stlwrite([handles.datapath '\' handles.animal '_octPatch.stl'], octPatch);
+    stlwrite([handles.datapath handles.separator handles.animal '_octPatch.stl'], octPatch);
     
     % Top View
     cla(handles.axesTopView)
@@ -476,8 +484,8 @@ pause(.5)
 handles.skullThick = str2double(get(handles.editSkullThickness, 'String'));
 
 % Load images
-ct   = load_nii( [handles.datapath '\' '*CT_skull*.nii.gz']  );
-cast = load_nii( [handles.datapath '\' '*inskull*.nii.gz'] );
+ct   = load_nii( [handles.datapath handles.separator '*CT_skull*.nii.gz']  );
+cast = load_nii( [handles.datapath handles.separator '*inskull*.nii.gz'] );
 xgv = ((0:(cast.hdr.dime.dim(2))-1)*cast.hdr.dime.pixdim(2)) -cast.hdr.hist.qoffset_x ;
 ygv = ((0:(cast.hdr.dime.dim(3))-1)*cast.hdr.dime.pixdim(3)) +cast.hdr.hist.qoffset_y ;
 zgv = ((0:(cast.hdr.dime.dim(4))-1)*cast.hdr.dime.pixdim(4)) +cast.hdr.hist.qoffset_z ;
@@ -486,8 +494,8 @@ zgv = ((0:(cast.hdr.dime.dim(4))-1)*cast.hdr.dime.pixdim(4)) +cast.hdr.hist.qoff
 % brain
 castPatchFull = isosurface(X,Y,Z,squeeze(cast.img),0.5); 
 castPatch     = reducepatch(castPatchFull,0.1);
-stlwrite([handles.datapath '\' handles.animal '_castPatchFull.stl'], castPatchFull);
-stlwrite([handles.datapath '\' handles.animal '_castPatch.stl'], castPatch);
+stlwrite([handles.datapath handles.separator handles.animal '_castPatchFull.stl'], castPatchFull);
+stlwrite([handles.datapath handles.separator handles.animal '_castPatch.stl'], castPatch);
 % skull
 zeroInd = max(find(zgv<2.0));
 ct.img(:,:,1:zeroInd) = 0;
@@ -495,8 +503,8 @@ ct.img(find(cast.img>0.5)) = 0; % prevent overlapp of the two volumes
 ctPatchFull = isosurface(X,Y,Z,squeeze(ct.img),500); 
 ctPatch     = reducepatch(ctPatchFull,0.2);
 
-stlwrite([handles.datapath '\' handles.animal '_ctPatchFull.stl'], ctPatchFull);
-stlwrite([handles.datapath '\' handles.animal '_ctPatch.stl'], ctPatch);
+stlwrite([handles.datapath handles.separator handles.animal '_ctPatchFull.stl'], ctPatchFull);
+stlwrite([handles.datapath handles.separator handles.animal '_ctPatch.stl'], ctPatch);
 
 % calculate the closest distance for all vertices of the ct to the cast.
 % vertices that are very close to the cast, most likely correspond to the
@@ -537,7 +545,7 @@ for i = 1:length(ctPatch.faces)
     end
 end
 octPatch.faces = invInd(ctPatch.faces(find(valPatch),:));
-stlwrite([handles.datapath '\' handles.animal '_octPatch.stl'], octPatch);
+stlwrite([handles.datapath handles.separator handles.animal '_octPatch.stl'], octPatch);
 
 % Progress view
 d.Value = 0.8;
@@ -654,7 +662,7 @@ end
 
 
 if filename(end-3:end) == '.xyz'
-    locs = readlocs([pathname '\' filename], 'format', {'channum','X','Y','Z','labels'});
+    locs = readlocs([pathname handles.separator filename], 'format', {'channum','X','Y','Z','labels'});
     for i = 1 : length(locs)
         x = locs(i).X;
         y = locs(i).Y;
@@ -663,7 +671,7 @@ if filename(end-3:end) == '.xyz'
         inskullelectrodes(i) = InskullElectrode(2, [x, y, z], label);
     end
 elseif filename(end-4:end) == '.locs'
-    locs = readlocs([pathname '\' filename]);
+    locs = readlocs([pathname handles.separator filename]);
     for i = 1 : length(locs)
         x = locs(i).X;
         y = locs(i).Y;
@@ -672,7 +680,7 @@ elseif filename(end-4:end) == '.locs'
         inskullelectrodes(i) = InskullElectrode(2, [x, y, z], label);
     end
 elseif filename(end-3:end) == '.sph'
-    locs = readlocs([pathname '\' filename]);
+    locs = readlocs([pathname handles.separator filename]);
     for i = 1 : length(locs)
         x = locs(i).X;
         y = locs(i).Y;
@@ -693,20 +701,20 @@ addon = char(datetime);
 addon = split(addon);
 addon = addon{2};
 addon = strrep(addon,':', '-');
-fid = fopen([handles.datapath '\location_' addon '.xyz'], 'w');
+fid = fopen([handles.datapath handles.separator 'location_' addon '.xyz'], 'w');
 for i = 1 : length(inskullelectrodes)
     fprintf(fid, [num2str(i) bl num2str(inskullelectrodes(i).cartesian_eeglab(1)) bl num2str(inskullelectrodes(i).cartesian_eeglab(2)) bl num2str(inskullelectrodes(i).cartesian_eeglab(3)) bl inskullelectrodes(i).label '\n']);
 end
 fclose(fid);
 
-fid = fopen([handles.datapath '\location_' addon '.sph'], 'w');
+fid = fopen([handles.datapath handles.separator 'location_' addon '.sph'], 'w');
 for i = 1 : length(inskullelectrodes)
     fprintf(fid, [num2str(i) bl num2str(locs(i).sph_theta) bl num2str(locs(i).sph_phi) bl locs(i).labels '\n']);
 end
 fclose(fid);
 
 % load locations
-locs = readlocs([handles.datapath '\location_' addon '.xyz'], 'format', {'channum','X','Y','Z','labels'});
+locs = readlocs([handles.datapath handles.separator 'location_' addon '.xyz'], 'format', {'channum','X','Y','Z','labels'});
 
 % Show in EEGLab View
 cla(handles.axesEEGLabView, 'reset')
@@ -779,14 +787,14 @@ addon = char(datetime);
 addon = split(addon);
 addon = addon{2};
 addon = strrep(addon,':', '-');
-fid = fopen([handles.datapath '\location_' addon '.xyz'], 'w');
+fid = fopen([handles.datapath handles.separator 'location_' addon '.xyz'], 'w');
 for i = 1 : length(inskullelectrodes)
     fprintf(fid, [num2str(i) bl num2str(inskullelectrodes(i).cartesian_eeglab(1)) bl num2str(inskullelectrodes(i).cartesian_eeglab(2)) bl num2str(inskullelectrodes(i).cartesian_eeglab(3)) bl inskullelectrodes(i).label '\n']);
 end
 fclose(fid);
 
 % load locations
-locs = readlocs([handles.datapath '\location_' addon '.xyz'], 'format', {'channum','X','Y','Z','labels'});
+locs = readlocs([handles.datapath handles.separator 'location_' addon '.xyz'], 'format', {'channum','X','Y','Z','labels'});
 
 % Show in EEGLab View
 cla(handles.axesEEGLabView, 'reset')
@@ -907,7 +915,7 @@ end
 % Print out position data
 writeElectrodes(skullelectrodes, handles.datapath, handles.O_q, handles.Fp_q);
 % Pirnt default settings
-% defaults_path = [handles.datapath '\defaults.txt'];
+% defaults_path = [handles.datapath handles.separator 'defaults.txt'];
 % fid = fopen(defaults_path, 'w');
 % if fid == -1
 %     error('Author:Function:OpenFile', 'Cannot open file: %s', handles.datapath);
@@ -925,7 +933,7 @@ if isequal(handles.datapath,0)
     disp('Please specify a data folder first.')
     return;
 end
-skullThick_path = [handles.datapath '\Setup_SkullThickness.txt'];
+skullThick_path = [handles.datapath handles.separator 'Setup_SkullThickness.txt'];
 fid = fopen(skullThick_path, 'w');
 if fid == -1
     error('Author:Function:OpenFile', 'Cannot open file: %s', skullThick_path);
@@ -946,7 +954,7 @@ if isequal(handles.datapath,0)
     disp('Please specify a data folder first.')
     return;
 end
-LandMarks_path = [handles.datapath '\Setup_LandMarks.txt'];
+LandMarks_path = [handles.datapath handles.separator 'Setup_LandMarks.txt'];
 fid = fopen(LandMarks_path, 'w');
 if fid == -1
     error('Author:Function:OpenFile', 'Cannot open file: %s', LandMarks_path);
@@ -969,7 +977,7 @@ if isequal(handles.datapath,0)
     disp('Please specify a data folder first.')
     return;
 end
-O_qFp_q_path = [handles.datapath '\Setup_O_qFp_q.txt'];
+O_qFp_q_path = [handles.datapath handles.separator 'Setup_O_qFp_q.txt'];
 fid = fopen(O_qFp_q_path, 'w');
 if fid == -1
     error('Author:Function:OpenFile', 'Cannot open file: %s', O_qFp_q_path);
@@ -1018,7 +1026,7 @@ if isequal(handles.datapath,0)
     disp('Please specify a data folder first.')
     return;
 end
-LandMarks_path = [handles.datapath '\Setup_LandMarks.txt'];
+LandMarks_path = [handles.datapath handles.separator 'Setup_LandMarks.txt'];
 fid = fopen(LandMarks_path, 'w');
 if fid == -1
     error('Author:Function:OpenFile', 'Cannot open file: %s', LandMarks_path);
@@ -1066,7 +1074,7 @@ if isequal(handles.datapath,0)
     disp('Please specify a data folder first.')
     return;
 end
-LandMarks_path = [handles.datapath '\Setup_LandMarks.txt'];
+LandMarks_path = [handles.datapath handles.separator 'Setup_LandMarks.txt'];
 fid = fopen(LandMarks_path, 'w');
 if fid == -1
     error('Author:Function:OpenFile', 'Cannot open file: %s', LandMarks_path);
@@ -1114,7 +1122,7 @@ if isequal(handles.datapath,0)
     disp('Please specify a data folder first.')
     return;
 end
-LandMarks_path = [handles.datapath '\Setup_LandMarks.txt'];
+LandMarks_path = [handles.datapath handles.separator 'Setup_LandMarks.txt'];
 fid = fopen(LandMarks_path, 'w');
 if fid == -1
     error('Author:Function:OpenFile', 'Cannot open file: %s', LandMarks_path);
@@ -1162,7 +1170,7 @@ if isequal(handles.datapath,0)
     disp('Please specify a data folder first.')
     return;
 end
-LandMarks_path = [handles.datapath '\Setup_LandMarks.txt'];
+LandMarks_path = [handles.datapath handles.separator 'Setup_LandMarks.txt'];
 fid = fopen(LandMarks_path, 'w');
 if fid == -1
     error('Author:Function:OpenFile', 'Cannot open file: %s', LandMarks_path);
@@ -1210,7 +1218,7 @@ if isequal(handles.datapath,0)
     disp('Please specify a data folder first.')
     return;
 end
-LandMarks_path = [handles.datapath '\Setup_LandMarks.txt'];
+LandMarks_path = [handles.datapath handles.separator 'Setup_LandMarks.txt'];
 fid = fopen(LandMarks_path, 'w');
 if fid == -1
     error('Author:Function:OpenFile', 'Cannot open file: %s', LandMarks_path);
@@ -1258,7 +1266,7 @@ if isequal(handles.datapath,0)
     disp('Please specify a data folder first.')
     return;
 end
-LandMarks_path = [handles.datapath '\Setup_LandMarks.txt'];
+LandMarks_path = [handles.datapath handles.separator 'Setup_LandMarks.txt'];
 fid = fopen(LandMarks_path, 'w');
 if fid == -1
     error('Author:Function:OpenFile', 'Cannot open file: %s', LandMarks_path);
@@ -1301,7 +1309,7 @@ if isequal(handles.datapath,0)
     disp('Please specify a data folder first.')
     return;
 end
-skullThick_path = [handles.datapath '\Setup_SkullThickness.txt'];
+skullThick_path = [handles.datapath handles.separator 'Setup_SkullThickness.txt'];
 fid = fopen(skullThick_path, 'w');
 if fid == -1
     error('Author:Function:OpenFile', 'Cannot open file: %s', skullThick_path);
@@ -1346,7 +1354,7 @@ if isequal(handles.datapath,0)
     disp('Please specify a data folder first.')
     return;
 end
-O_qFp_q_path = [handles.datapath '\Setup_O_qFp_q.txt'];
+O_qFp_q_path = [handles.datapath handles.separator 'Setup_O_qFp_q.txt'];
 fid = fopen(O_qFp_q_path, 'w');
 if fid == -1
     error('Author:Function:OpenFile', 'Cannot open file: %s', O_qFp_q_path);
@@ -1393,7 +1401,7 @@ if isequal(handles.datapath,0)
     disp('Please specify a data folder first.')
     return;
 end
-O_qFp_q_path = [handles.datapath '\Setup_O_qFp_q.txt'];
+O_qFp_q_path = [handles.datapath handles.separator 'Setup_O_qFp_q.txt'];
 fid = fopen(O_qFp_q_path, 'w');
 if fid == -1
     error('Author:Function:OpenFile', 'Cannot open file: %s', O_qFp_q_path);
