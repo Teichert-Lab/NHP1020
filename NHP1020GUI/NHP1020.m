@@ -85,13 +85,13 @@ x = [0; 0.05; 0.05; 0];
 y = [0; 0; 1; 1];
 c = [1, 1, 10, 10];
 hp = patch(section5, x, y, c);
-textLogo=text(0.5, 0.15,'NHP 1020', 'FontSize', 40, 'Units','normalized');
+textLogo=text(0.5, 0.15,'NHP 1020', 'FontSize', 40, 'Units','normalized','FontUnits','normalized');
 uistack(textLogo, 'top')
 set(textLogo,'Rotation',90);
-textLogo=text(0.5, 0.45,'NHP 1020', 'FontSize', 40, 'Units','normalized');
+textLogo=text(0.5, 0.45,'NHP 1020', 'FontSize', 40, 'Units','normalized','FontUnits','normalized');
 uistack(textLogo, 'top')
 set(textLogo,'Rotation',90);
-textLogo=text(0.5, 0.75,'NHP 1020', 'FontSize', 40, 'Units','normalized');
+textLogo=text(0.5, 0.75,'NHP 1020', 'FontSize', 40, 'Units','normalized','FontUnits','normalized');
 uistack(textLogo, 'top')
 set(textLogo,'Rotation',90);
 colormap('gray');
@@ -104,7 +104,7 @@ x = [0; 0.05; 0.05; 0];
 y = [0; 0; 1; 1];
 c = [1, 1, 10, 10];
 hp = patch(section6, x, y, c);
-textLogo=text(0.1, 0.5,'NHP 1020', 'FontSize', 50, 'Units','normalized');
+textLogo=text(0.1, 0.5,'NHP 1020', 'FontSize', 50, 'Units','normalized','FontUnits','normalized');
 uistack(textLogo, 'top')
 
 set(section6, 'xtick', [], 'ytick', [], 'ztick', []);
@@ -122,7 +122,7 @@ hold off
 axes(handles.axesData);
 fill(handles.axesData, [0, 0, -0.5, 0.5, 1.5, 1, 1], [0, -0.3, -0.3, -0.5, -0.3, -0.3, 0], 1, 'FaceColor', handles.buttoncolor1);
 set(handles.axesData, 'Color', 'none', 'xtick', [], 'ytick', [], 'Visible', 'off');
-textData=text(0.5,-0.3,'Data', 'FontSize', 25);
+textData=text(0.5,-0.3,'Data', 'FontSize', 25,'FontUnits','normalized');
 set(textData,'Rotation',90);
 
 % Color Section 2
@@ -144,7 +144,7 @@ axes(handles.axesMetric);
 axes(handles.axesMetric);
 fill([0, 0, -0.5, 0.5, 1.5, 1, 1], [0, -0.3, -0.3, -0.5, -0.3, -0.3, 0], 1, 'FaceColor', handles.buttoncolor2);
 set(handles.axesMetric, 'Color', 'none', 'xtick', [], 'ytick', [], 'Visible', 'off');
-textMetric=text(0.5,-0.3,'Metric', 'FontSize', 25);
+textMetric=text(0.5,-0.3,'Metric', 'FontSize', 25,'FontUnits','normalized');
 set(textMetric,'Rotation',90);
 
 % Color Section 3
@@ -156,7 +156,7 @@ axes(handles.axesLayout);
 axes(handles.axesLayout);
 fill([0, 0, -0.5, 0.5, 1.5, 1, 1], [0, -0.3, -0.3, -0.5, -0.3, -0.3, 0], 1, 'FaceColor', handles.buttoncolor3);
 set(handles.axesLayout, 'Color', 'none', 'xtick', [], 'ytick', [], 'Visible', 'off');
-textLayout=text(0.5,-0.3,'Layout', 'FontSize', 25);
+textLayout=text(0.5,-0.3,'Layout', 'FontSize', 25, 'FontUnits','normalized');
 set(textLayout,'Rotation',90);
 
 % Color Section 4
