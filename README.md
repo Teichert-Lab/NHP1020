@@ -6,7 +6,7 @@ This is a MATLAB repository for non-human primates' EEG.
 1. Git clone this repository.
 2. Please put the CT and MR file ending by 'CT_skull.nii.gz' and 'inskull.nii.gz' in the NHP1020/data.
 3. Open NHP1020/NHP1020GUI/NHP1020.m file in MATLAB and run.
-4. Additional Toolboxes: Phased Array System Toolbox, [eeglab](https://sccn.ucsd.edu/eeglab/download.php). It is recommended to put the eeglab folder into the NHP1020/toolbox folder.
+4. Additional Toolboxes: Phased Array System Toolbox, [eeglab](https://sccn.ucsd.edu/eeglab/download.php). It is recommended to change ensure that the eeglab folder name is 'eeglab' and put the eeglab folder into the NHP1020/toolbox folder.
 
 ### Load Image and Analysis
 5. Specify a folder in the **Data Panel** for saving data. If .stl files are available, it will load them automatically. Otherwiise, it will calucate the the brain and skull from the .nii.gz files. If you need change the skullthickness, just press **Recalculate Patch** button after specifying a number for skullthickness.
