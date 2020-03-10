@@ -220,14 +220,6 @@ else
     idcs   = strfind(selpath,'/');
 end
 
-
-% Progress view
-f = uifigure;
-d = uiprogressdlg(f,'Title','Please Wait',...
-        'Message','Loading...');
-d.Value = 0.2;
-pause(.5)
-
 % Set saving path and animal name
 handles.basedir = basedir;
 handles.datapath = selpath;
@@ -235,6 +227,20 @@ handles.animal = selpath(idcs(end)+1:end);
 
 % Add Toolbox
 addpath(genpath([handles.basedir '/toolbox']));
+
+% Check eeglab toolbox
+eeglab_isLoaded = exist([handles.basedir '/toolbox/eeglab']);
+if eeglab_isLoaded ~= 7 % not exist
+    warning = msgbox('Please download eeeglab from https://sccn.ucsd.edu/eeglab/download.php and rename the folder as eeglab and put it in the toolbox folder.');
+    return
+end
+
+% Progress view
+f = uifigure;
+d = uiprogressdlg(f,'Title','Please Wait',...
+        'Message','Loading...');
+d.Value = 0.2;
+pause(.5)
 
 % load default skullthick
 fid = fopen([handles.datapath '/Setup_SkullThickness.txt']);
@@ -594,6 +600,7 @@ function pushbuttonPreview_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbuttonPreview (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
 if handles.datapath == 0
     warning = msgbox('Please specify a data folder first.');
     return
