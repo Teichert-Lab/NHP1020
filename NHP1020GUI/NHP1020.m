@@ -55,8 +55,6 @@ function NHP1020_OpeningFcn(hObject, eventdata, handles, varargin)
 % Choose default command line output for NHP1020
 handles.output = hObject;
 
-% Add Toolbox
-addpath(genpath([handles.basedir '/toolbox']));
 
 % check data path and position file
 handles.datapath = 0;
