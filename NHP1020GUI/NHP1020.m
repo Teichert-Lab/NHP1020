@@ -175,9 +175,9 @@ axes(handles.axesSkullFinalView);
 hold off
 
 handles.GUIpath = pwd;
-mydir  = handles.GUIpath;
-idcs   = strfind(mydir,'/');
-newdir = [mydir(1:idcs(end)-1) '/logo'];
+% mydir  = handles.GUIpath;
+% idcs   = strfind(mydir,'/');
+% newdir = [mydir(1:idcs(end)-1) '/logo'];
 
 % Insert Logo
 
