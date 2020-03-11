@@ -85,13 +85,13 @@ x = [0; 0.05; 0.05; 0];
 y = [0; 0; 1; 1];
 c = [1, 1, 10, 10];
 hp = patch(section5, x, y, c);
-textLogo=text(0.5, 0.15,'NHP 1020', 'FontSize', 40, 'Units','normalized','FontUnits','normalized');
+textLogo=text(0.5, 0.15,'NHP 1020', 'FontSize', 30, 'Units','normalized','FontUnits','normalized');
 uistack(textLogo, 'top')
 set(textLogo,'Rotation',90);
-textLogo=text(0.5, 0.45,'NHP 1020', 'FontSize', 40, 'Units','normalized','FontUnits','normalized');
+textLogo=text(0.5, 0.45,'NHP 1020', 'FontSize', 30, 'Units','normalized','FontUnits','normalized');
 uistack(textLogo, 'top')
 set(textLogo,'Rotation',90);
-textLogo=text(0.5, 0.75,'NHP 1020', 'FontSize', 40, 'Units','normalized','FontUnits','normalized');
+textLogo=text(0.5, 0.75,'NHP 1020', 'FontSize', 30, 'Units','normalized','FontUnits','normalized');
 uistack(textLogo, 'top')
 set(textLogo,'Rotation',90);
 colormap('gray');
