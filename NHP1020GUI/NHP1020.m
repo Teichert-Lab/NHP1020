@@ -128,7 +128,6 @@ set(textData,'Rotation',90);
 % Color Section 2
 handles.buttoncolor2 = '#fdbe85';
 set(handles.uipanelInion, 'BackgroundColor', handles.color2, 'HighlightColor', handles.bordercolor);
-set(handles.uipanelInion, 'FontUnits', 'normalized');
 set(handles.uipanelInionX, 'BackgroundColor', handles.color2, 'HighlightColor', handles.bordercolor);
 set(handles.uipanelInionY, 'BackgroundColor', handles.color2, 'HighlightColor', handles.bordercolor);
 set(handles.uipanelInionZ, 'BackgroundColor', handles.color2, 'HighlightColor', handles.bordercolor);
