@@ -231,9 +231,18 @@ handles.animal = selpath(idcs(end)+1:end);
 addpath(genpath([handles.basedir handles.separator 'toolbox']));
 
 % Check eeglab toolbox
-eeglab_isLoaded = exist([handles.basedir '/toolbox/eeglab']);
-if eeglab_isLoaded ~= 7 % not exist
-    warning = msgbox('Please download eeeglab from https://sccn.ucsd.edu/eeglab/download.php and rename the folder as eeglab and put it in the toolbox folder.');
+% eeglab_isLoaded = exist([handles.basedir '/toolbox/eeglab']);
+% if eeglab_isLoaded ~= 7 % not exist
+%     readlocs_isLoaded = exist('readlocs');
+%     if readlocs_isLoaded ~= 2
+%         warning = msgbox('Please download eeeglab from https://sccn.ucsd.edu/eeglab/download.php and rename the folder as eeglab and put it in the toolbox folder. Or please set the eeglab and its subpath to the path.');
+%         return
+%     end
+% end
+readlocs_isLoaded = exist('readlocs');
+topoplot_isLoaded = exist('topoplot');
+if (readlocs_isLoaded ~= 2) || (topoplot_isLoaded ~= 2)
+    warning = msgbox('Please download eeeglab from https://sccn.ucsd.edu/eeglab/download.php and rename the folder as eeglab and put it in the toolbox folder. Or please set the eeglab and its subfolders to the path.');
     return
 end
 
