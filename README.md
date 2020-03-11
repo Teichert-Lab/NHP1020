@@ -1,4 +1,4 @@
-# If you need any help, please [report a issue](https://github.com/Teichert-Lab/NHP1020/issues) or email spike.iatry@gmail.com. We would love to help you solve any issues!
+# If you need any help, please [report an issue](https://github.com/Teichert-Lab/NHP1020/issues) or email spike.iatry@gmail.com. We would love to help you solve any issues!
 
 # NHP1020
 This MATLAB repository establishes a surface metric and software toolbox for EEG electrode grids in the macaque.
