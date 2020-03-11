@@ -1,3 +1,5 @@
+# If you need any help, please [report a issue](https://github.com/Teichert-Lab/NHP1020/issues) or email https://github.com/Teichert-Lab/NHP1020/issues. We would love to help you solve any issues!
+
 # NHP1020
 This is a MATLAB repository for non-human primates' EEG.
 
