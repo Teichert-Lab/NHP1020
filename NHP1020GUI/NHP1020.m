@@ -602,6 +602,7 @@ function pushbuttonPreview_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbuttonPreview (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
 if handles.datapath == 0
     warning = msgbox('Please specify a data folder first.');
     return
