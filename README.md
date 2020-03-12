@@ -1,5 +1,7 @@
 # If you need any help, please [report an issue](https://github.com/Teichert-Lab/NHP1020/issues) or email spike.iatry@gmail.com. We would love to help you solve any issues!
 
+# Preprint Version is [here](https://www.biorxiv.org/content/10.1101/2020.03.10.986588v1)!
+
 # NHP1020
 This MATLAB repository establishes a surface metric and software toolbox for EEG electrode grids in the macaque.
 
@@ -57,6 +59,6 @@ Eric Johnson (2020). STL File Reader (https://www.mathworks.com/matlabcentral/fi
 6. EEGlab plot update (red electrodes, gray line)
 
 ## References
-
-1. Sven (2020). stlwrite - write ASCII or Binary STL files (https://www.mathworks.com/matlabcentral/fileexchange/20922-stlwrite-write-ascii-or-binary-stl-files), MATLAB Central File Exchange. Retrieved February 7, 2020.  
-2. Eric Johnson (2020). STL File Reader (https://www.mathworks.com/matlabcentral/fileexchange/22409-stl-file-reader), MATLAB Central File Exchange. Retrieved February 7, 2020.
+1. Fan Li, Tobias Teichert (2020), A surface metric and software toolbox for EEG electrode grids in the macaque. (https://www.biorxiv.org/content/10.1101/2020.03.10.986588v1)
+2. Sven (2020). stlwrite - write ASCII or Binary STL files (https://www.mathworks.com/matlabcentral/fileexchange/20922-stlwrite-write-ascii-or-binary-stl-files), MATLAB Central File Exchange. Retrieved February 7, 2020.  
+3. Eric Johnson (2020). STL File Reader (https://www.mathworks.com/matlabcentral/fileexchange/22409-stl-file-reader), MATLAB Central File Exchange. Retrieved February 7, 2020.
