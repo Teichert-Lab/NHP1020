@@ -5,6 +5,8 @@
 # NHP1020
 This MATLAB repository establishes a surface metric and software toolbox for EEG electrode grids in the macaque.
 
+![GUI Overview](GUI.png)
+
 ## Usage:
 ### Installation
 1. Git clone this repository.
