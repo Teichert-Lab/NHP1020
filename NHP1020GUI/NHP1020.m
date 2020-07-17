@@ -22,7 +22,7 @@ function varargout = NHP1020(varargin)
 
 % Edit the above text to modify the response to help NHP1020
 
-% Last Modified by GUIDE v2.5 11-Feb-2020 14:59:05
+% Last Modified by GUIDE v2.5 07-Jul-2020 15:52:27
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -263,6 +263,18 @@ if fid ~= -1
     guidata(hObject, handles);
 end
 
+
+% load default skullthreshold
+fid = fopen([handles.datapath handles.separator 'Setup_SkullThreshold.txt']);
+if fid ~= -1
+    line = fgetl(fid);
+    line = fgetl(fid);
+    newStr = split(line, ' ');
+    set(handles.editSkullThreshold, 'String', newStr(1));
+    guidata(hObject, handles);
+end
+
+
 fid = fopen([handles.datapath handles.separator 'Setup_LandMarks.txt']);
 if fid ~= -1
     line = fgetl(fid);
@@ -357,106 +369,110 @@ if isfile([handles.datapath handles.separator handles.animal '_castPatchFull.stl
         end
     end
 else
-    % If stl file does not exit, calculate it
-    % Save skull thickness
-    handles.skullThick = str2double(get(handles.editSkullThickness, 'String'));
-
-    % Load images
-%     ct   = load_nii( [handles.datapath handles.separator handles.animal, '_CT_skull_filt.nii.gz']  );
-%     cast = load_nii( [handles.datapath handles.separator handles.animal, '_inskull_mask_filt.nii.gz'] );
-    ct   = load_nii( [handles.datapath handles.separator '*CT_skull*.nii.gz']  );
-    cast = load_nii( [handles.datapath handles.separator '*inskull*.nii.gz'] );
-    xgv = ((0:(cast.hdr.dime.dim(2))-1)*cast.hdr.dime.pixdim(2)) -cast.hdr.hist.qoffset_x ;
-    ygv = ((0:(cast.hdr.dime.dim(3))-1)*cast.hdr.dime.pixdim(3)) +cast.hdr.hist.qoffset_y ;
-    zgv = ((0:(cast.hdr.dime.dim(4))-1)*cast.hdr.dime.pixdim(4)) +cast.hdr.hist.qoffset_z ;
-    [X,Y,Z] = meshgrid(ygv,xgv,zgv);
-
-    % brain
-    castPatchFull = isosurface(X,Y,Z,squeeze(cast.img),0.5); 
-    castPatch     = reducepatch(castPatchFull,0.1);
-    stlwrite([handles.datapath handles.separator handles.animal '_castPatchFull.stl'], castPatchFull);
-    stlwrite([handles.datapath handles.separator handles.animal '_castPatch.stl'], castPatch);
-    % skull
-    zeroInd = max(find(zgv<2.0));
-    ct.img(:,:,1:zeroInd) = 0;
-    ct.img(find(cast.img>0.5)) = 0; % prevent overlapp of the two volumes
-    ctPatchFull = isosurface(X,Y,Z,squeeze(ct.img),500); 
-    ctPatch     = reducepatch(ctPatchFull,0.2);
-
-    stlwrite([handles.datapath handles.separator handles.animal '_ctPatchFull.stl'], ctPatchFull);
-    stlwrite([handles.datapath handles.separator handles.animal '_ctPatch.stl'], ctPatch);
-
-    % calculate the closest distance for all vertices of the ct to the cast.
-    % vertices that are very close to the cast, most likely correspond to the
-    % inside skull surface. Remove those vertices and corresponding faces
-    minDist = zeros( size(ctPatch.vertices,1),2 );
-    for i = 1:length(ctPatch.vertices)
-        iMat  = [ ctPatch.vertices(i,1)*ones(size(castPatchFull.vertices,1),1),...  
-                  ctPatch.vertices(i,2)*ones(size(castPatchFull.vertices,1),1),...  
-                  ctPatch.vertices(i,3)*ones(size(castPatchFull.vertices,1),1)]';
-        tmp = castPatchFull.vertices' - iMat;
-        dst = sqrt(sum( tmp .* tmp, 1 ));
-        minDist(i,1) = min(dst);
-        disc         = find(dst==min(dst));
-        minDist(i,2) = disc(1);
-    end
-
-    % Load skullThick from input
-    skullThick = handles.skullThick;
-
-    % Calculate octPatch
-    valInd            = find( minDist(:,1)>skullThick );
-    invInd            = zeros(length(ctPatch.vertices),1 );
-    invInd(valInd)    = 1:length(valInd);
-    octPatch.vertices = ctPatch.vertices(valInd,:);
-    valPatch          = zeros(length(ctPatchFull.faces),1);
-    for i = 1:length(ctPatch.faces)
-        if ismember( ctPatch.faces(i,1), valInd ) && ismember( ctPatch.faces(i,2), valInd ) && ismember( ctPatch.faces(i,3), valInd )  
-            valPatch(i) = 1;
-            %pi = pi + 1;
-            %octPatch.faces(pi) = invInd(ctPatch.faces(i,:));
-
-        end
-    end
-    octPatch.faces = invInd(ctPatch.faces(find(valPatch),:));
-    stlwrite([handles.datapath handles.separator handles.animal '_octPatch.stl'], octPatch);
     
-    % Top View
-    cla(handles.axesTopView)
-    axes(handles.axesTopView);
-    hold off
-    p = patch(handles.axesTopView, castPatch);
-    set(p, 'FaceColor', handles.bordercolor, 'EdgeColor', 'none');
-    daspect([1 1 1])
-    light('Position', [1 0 0], 'Style', 'infinite' )
-    camlight; lighting phong
-    hold on
-    p = patch(handles.axesTopView, octPatch);
-    set(p, 'FaceColor', [0.5 0.5 1], 'EdgeColor', 'none');
-    alpha(0.5)
-    view([0, 0, 1])
-    camroll(90)
-
-    % Display Section
-    cla(handles.axesSkullandBrain)
-    axes(handles.axesSkullandBrain);
-    hold off
-    p = patch(handles.axesSkullandBrain, castPatch);
-    set(p, 'FaceColor', handles.bordercolor, 'EdgeColor', 'none');
-    daspect([1 1 1])
-    view(2)
-    light('Position', [1 0 0], 'Style', 'infinite' )
-    camlight; lighting phong
-    hold on
-    p = patch(handles.axesSkullandBrain, octPatch);
-    set(p, 'FaceColor', [0.5 0.5 1], 'EdgeColor', 'none');
-    alpha(0.5)
-    view([0, -1, 0])
-
-    % Save to handles
-    handles.castPatchFull = castPatchFull;
-    handles.castPatch = castPatch;
-    handles.octPatch = octPatch;
+    
+    if 1==0
+        % If stl file does not exit, calculate it
+        % Save skull thickness
+        handles.skullThick = str2double(get(handles.editSkullThickness, 'String'));
+        
+        % Load images
+        %     ct   = load_nii( [handles.datapath handles.separator handles.animal, '_CT_skull_filt.nii.gz']  );
+        %     cast = load_nii( [handles.datapath handles.separator handles.animal, '_inskull_mask_filt.nii.gz'] );
+        ct   = load_nii( [handles.datapath handles.separator '*CT_skull*.nii.gz']  );
+        cast = load_nii( [handles.datapath handles.separator '*inskull*.nii.gz'] );
+        xgv = ((0:(cast.hdr.dime.dim(2))-1)*cast.hdr.dime.pixdim(2)) -cast.hdr.hist.qoffset_x ;
+        ygv = ((0:(cast.hdr.dime.dim(3))-1)*cast.hdr.dime.pixdim(3)) +cast.hdr.hist.qoffset_y ;
+        zgv = ((0:(cast.hdr.dime.dim(4))-1)*cast.hdr.dime.pixdim(4)) +cast.hdr.hist.qoffset_z ;
+        [X,Y,Z] = meshgrid(ygv,xgv,zgv);
+        
+        % brain
+        castPatchFull = isosurface(X,Y,Z,squeeze(cast.img),0.5);
+        castPatch     = reducepatch(castPatchFull,0.1);
+        stlwrite([handles.datapath handles.separator handles.animal '_castPatchFull.stl'], castPatchFull);
+        stlwrite([handles.datapath handles.separator handles.animal '_castPatch.stl'], castPatch);
+        % skull
+        zeroInd = max(find(zgv<2.0));
+        ct.img(:,:,1:zeroInd) = 0;
+        ct.img(find(cast.img>0.5)) = 0; % prevent overlapp of the two volumes
+        ctPatchFull = isosurface(X,Y,Z,squeeze(ct.img),500);
+        ctPatch     = reducepatch(ctPatchFull,0.2);
+        
+        stlwrite([handles.datapath handles.separator handles.animal '_ctPatchFull.stl'], ctPatchFull);
+        stlwrite([handles.datapath handles.separator handles.animal '_ctPatch.stl'], ctPatch);
+        
+        % calculate the closest distance for all vertices of the ct to the cast.
+        % vertices that are very close to the cast, most likely correspond to the
+        % inside skull surface. Remove those vertices and corresponding faces
+        minDist = zeros( size(ctPatch.vertices,1),2 );
+        for i = 1:length(ctPatch.vertices)
+            iMat  = [ ctPatch.vertices(i,1)*ones(size(castPatchFull.vertices,1),1),...
+                ctPatch.vertices(i,2)*ones(size(castPatchFull.vertices,1),1),...
+                ctPatch.vertices(i,3)*ones(size(castPatchFull.vertices,1),1)]';
+            tmp = castPatchFull.vertices' - iMat;
+            dst = sqrt(sum( tmp .* tmp, 1 ));
+            minDist(i,1) = min(dst);
+            disc         = find(dst==min(dst));
+            minDist(i,2) = disc(1);
+        end
+        
+        % Load skullThick from input
+        skullThick = handles.skullThick;
+        
+        % Calculate octPatch
+        valInd            = find( minDist(:,1)>skullThick );
+        invInd            = zeros(length(ctPatch.vertices),1 );
+        invInd(valInd)    = 1:length(valInd);
+        octPatch.vertices = ctPatch.vertices(valInd,:);
+        valPatch          = zeros(length(ctPatchFull.faces),1);
+        for i = 1:length(ctPatch.faces)
+            if ismember( ctPatch.faces(i,1), valInd ) && ismember( ctPatch.faces(i,2), valInd ) && ismember( ctPatch.faces(i,3), valInd )
+                valPatch(i) = 1;
+                %pi = pi + 1;
+                %octPatch.faces(pi) = invInd(ctPatch.faces(i,:));
+                
+            end
+        end
+        octPatch.faces = invInd(ctPatch.faces(find(valPatch),:));
+        stlwrite([handles.datapath handles.separator handles.animal '_octPatch.stl'], octPatch);
+        
+        % Top View
+        cla(handles.axesTopView)
+        axes(handles.axesTopView);
+        hold off
+        p = patch(handles.axesTopView, castPatch);
+        set(p, 'FaceColor', handles.bordercolor, 'EdgeColor', 'none');
+        daspect([1 1 1])
+        light('Position', [1 0 0], 'Style', 'infinite' )
+        camlight; lighting phong
+        hold on
+        p = patch(handles.axesTopView, octPatch);
+        set(p, 'FaceColor', [0.5 0.5 1], 'EdgeColor', 'none');
+        alpha(0.5)
+        view([0, 0, 1])
+        camroll(90)
+        
+        % Display Section
+        cla(handles.axesSkullandBrain)
+        axes(handles.axesSkullandBrain);
+        hold off
+        p = patch(handles.axesSkullandBrain, castPatch);
+        set(p, 'FaceColor', handles.bordercolor, 'EdgeColor', 'none');
+        daspect([1 1 1])
+        view(2)
+        light('Position', [1 0 0], 'Style', 'infinite' )
+        camlight; lighting phong
+        hold on
+        p = patch(handles.axesSkullandBrain, octPatch);
+        set(p, 'FaceColor', [0.5 0.5 1], 'EdgeColor', 'none');
+        alpha(0.5)
+        view([0, -1, 0])
+        
+        % Save to handles
+        handles.castPatchFull = castPatchFull;
+        handles.castPatch = castPatch;
+        handles.octPatch = octPatch;
+    end
 end
 
 % Close progress bar
@@ -465,8 +481,8 @@ d.Message = 'Done!';
 pause(.5)
 close(d);
 close(f);
-    
-            
+
+
 guidata(hObject, handles);
 
 
@@ -491,6 +507,7 @@ pause(.5)
 
 % Save skull thickness
 handles.skullThick = str2double(get(handles.editSkullThickness, 'String'));
+handles.skullThresh = str2double(get(handles.editSkullThreshold, 'String'));
 
 % Load images
 ct   = load_nii( [handles.datapath handles.separator '*CT_skull*.nii.gz']  );
@@ -509,7 +526,7 @@ stlwrite([handles.datapath handles.separator handles.animal '_castPatch.stl'], c
 zeroInd = max(find(zgv<2.0));
 ct.img(:,:,1:zeroInd) = 0;
 ct.img(find(cast.img>0.5)) = 0; % prevent overlapp of the two volumes
-ctPatchFull = isosurface(X,Y,Z,squeeze(ct.img),500); 
+ctPatchFull = isosurface(X,Y,Z,squeeze(ct.img),handles.skullThresh); 
 ctPatch     = reducepatch(ctPatchFull,0.2);
 
 stlwrite([handles.datapath handles.separator handles.animal '_ctPatchFull.stl'], ctPatchFull);
@@ -604,6 +621,8 @@ handles.castPatchFull = castPatchFull;
 handles.castPatch = castPatch;
 handles.octPatch = octPatch;
 guidata(hObject, handles);
+
+
 
 
 % --- Executes on button press in pushbuttonPreview.
@@ -1431,6 +1450,48 @@ guidata(hObject, handles);
 % --- Executes during object creation, after setting all properties.
 function editO_q_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to editO_q (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function editSkullThreshold_Callback(hObject, eventdata, handles)
+% hObject    handle to editSkullThreshold (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of editSkullThreshold as text
+%        str2double(get(hObject,'String')) returns contents of editSkullThreshold as a double
+
+handles.skullThresh = str2double(get(handles.editSkullThreshold, 'String'));
+
+if isequal(handles.datapath,0)
+    disp('Please specify a data folder first.')
+    return;
+end
+skullThresh_path = [handles.datapath handles.separator 'Setup_SkullThresh.txt'];
+fid = fopen(skullThresh_path, 'w');
+if fid == -1
+    error('Author:Function:OpenFile', 'Cannot open file: %s', skullThresh_path);
+end
+titleLine = 'SkullThreshold \n';
+fprintf(fid, titleLine);
+bl = ' ';
+defaultsLine = [num2str(handles.skullThresh) bl '\n'];
+fprintf(fid, defaultsLine);
+fclose(fid);
+
+guidata(hObject, handles);
+
+% --- Executes during object creation, after setting all properties.
+function editSkullThreshold_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to editSkullThreshold (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
