@@ -1,6 +1,6 @@
-# If you need any help, please [report an issue](https://github.com/Teichert-Lab/NHP1020/issues) or email spike.iatry@gmail.com. We would love to help you solve any issues!
+If you need any help, please email us at spike.iatry@gmail.com or [report an issue](https://github.com/Teichert-Lab/NHP1020/issues).
 
-# We have submitted preprint version: *A surface metric and software toolbox for EEG electrode grids in the macaque (Fan Li & Tobias Teichert, 2020)* to bioRxiv, please find [here](https://www.biorxiv.org/content/10.1101/2020.03.10.986588v1)!
+For details check out our bioRxiv preprint: *A surface metric and software toolbox for EEG electrode grids in the macaque (Fan Li & Tobias Teichert, 2020)* to bioRxiv, please find [here](https://www.biorxiv.org/content/10.1101/2020.03.10.986588v1)!
 
 # NHP1020
 This MATLAB repository establishes a surface metric and software toolbox for EEG electrode grids in the macaque.
